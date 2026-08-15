@@ -1,0 +1,37 @@
+{
+  "chapter": { "code": "CH4", "name": "第四章 电子商务环境下的物流系统", "sortNo": 4 },
+  "moduleId": "CH4-006",
+  "name": "电商最后一公里配送模式仿真",
+  "engineKey": "last-mile",
+  "difficulty": "basic",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "上门配送、快递柜、社区驿站、众包配送、即时配送",
+  "description": "末端包裹到达 → 选择配送模式（上门：快递员按路线逐户配送→无人需二次投递；快递柜：存柜→通知消费者→24h 内取件；驿站：批量投递到站点→消费者自提；众包：平台派单给众包骑手→即时送达）→ 各模式成本/时效/体验/投诉对比",
+  "deps": [],
+  "params": [
+    { "key": "daily_parcels", "label": "日均末端包裹量", "type": "int", "unit": "件/天", "min": 500, "max": 50000, "step": 500, "default": 5000, "description": "配送站日包裹" },
+    { "key": "home_delivery_success", "label": "上门一次妥投率", "type": "float", "min": 0.6, "max": 0.95, "step": 0.01, "default": 0.85, "description": "无人签收 = 二次投递" },
+    { "key": "locker_slots", "label": "快递柜格口数", "type": "int", "unit": "格", "min": 50, "max": 500, "step": 10, "default": 200, "description": "柜口容量" },
+    { "key": "locker_turnover", "label": "快递柜周转率", "type": "float", "unit": "次/天", "min": 1, "max": 5, "step": 0.1, "default": 2.5, "description": "格口日周转" },
+    { "key": "station_radius", "label": "驿站覆盖半径", "type": "float", "unit": "米", "min": 300, "max": 1000, "step": 50, "default": 500, "description": "消费者步行容忍距离" },
+    { "key": "crowd_unit_price", "label": "众包骑手单价", "type": "float", "unit": "元/单", "min": 3, "max": 10, "step": 0.5, "default": 6, "description": "众包成本" },
+    { "key": "consumer_preference", "label": "消费者偏好分布", "type": "dist", "fields": [
+      { "key": "home", "label": "上门", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.4 },
+      { "key": "locker", "label": "快递柜", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.3 },
+      { "key": "station", "label": "驿站", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.2 },
+      { "key": "crowd", "label": "众包", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.1 }
+    ], "description": "上门/柜/站/众包偏好权重（和=1）" }
+  ],
+  "outputs": [
+    { "key": "unit_cost_compare", "label": "各模式单均成本", "type": "compare", "unit": "元/单" },
+    { "key": "delivery_time_compare", "label": "平均配送时效", "type": "compare", "unit": "小时" },
+    { "key": "satisfaction_compare", "label": "消费者满意度", "type": "compare", "unit": "分" },
+    { "key": "redelivery_rate", "label": "二次投递率", "type": "scalar", "unit": "%" },
+    { "key": "best_mode_mix", "label": "最优模式组合", "type": "scalar" }
+  ],
+  "constraints": [
+    { "name": "cost_budget", "expression": "total_cost <= budget", "message": "末端配送总成本不能超过预算" },
+    { "name": "satisfaction_4", "expression": "satisfaction >= 4.0", "message": "消费者满意度需不低于 4.0/5.0" }
+  ]
+}

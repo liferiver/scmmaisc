@@ -1,0 +1,32 @@
+{
+  "chapter": { "code": "CH7", "name": "第七章 供应链设计与构建", "sortNo": 7 },
+  "moduleId": "CH7-002",
+  "name": "推动/拉动/推拉结合策略仿真",
+  "engineKey": "push-pull",
+  "difficulty": "basic",
+  "classHours": 2,
+  "isRolePlay": false,
+  "concept": "Push(按预测生产)、Pull(按订单生产)、Push-Pull(延迟差异化)、解耦点(CODP)",
+  "description": "对比三种策略在同一产品下的表现：Push(预测→生产→库存→销售，需求不匹配风险) / Pull(订单→生产→交付，响应慢但库存低) / Push-Pull(通用半成品按预测 Push→接到订单后定制 Pull→交付) → 移动解耦点位置 → 观察库存/响应时间/缺货/总成本变化",
+  "deps": [ "CH2-003" ],
+  "params": [
+    { "key": "customization", "label": "产品定制化程度", "type": "float", "min": 0, "max": 1, "step": 0.1, "default": 0.5, "description": "0=完全标准化，1=高度定制" },
+    { "key": "forecast_mape", "label": "需求预测误差MAPE", "type": "float", "min": 0.1, "max": 0.4, "step": 0.01, "default": 0.2, "description": "预测误差" },
+    { "key": "demand_cv", "label": "需求波动CV", "type": "float", "min": 0.1, "max": 0.8, "step": 0.05, "default": 0.4, "description": "需求变异系数" },
+    { "key": "production_lead_time", "label": "生产提前期", "type": "float", "unit": "天", "min": 5, "max": 60, "step": 1, "default": 5, "description": "制造周期" },
+    { "key": "customer_wait_tolerance", "label": "客户容忍等待时间", "type": "float", "unit": "天", "min": 1, "max": 14, "step": 1, "default": 7, "description": "Pull 策略可行性约束" },
+    { "key": "decoupling_point", "label": "解耦点位置", "type": "enum", "default": "finished", "options": [ { "label": "原材料", "value": "raw" }, { "label": "半成品", "value": "semi" }, { "label": "成品", "value": "finished" }, { "label": "分销", "value": "distribution" }, { "label": "零售", "value": "retail" } ], "description": "CODP 位置" },
+    { "key": "holding_cost", "label": "单位库存持有成本", "type": "float", "unit": "元/单位·年", "min": 1, "max": 100, "step": 1, "default": 20, "description": "库存持有成本" },
+    { "key": "stockout_cost", "label": "单位缺货成本", "type": "float", "unit": "元/次", "min": 10, "max": 500, "step": 10, "default": 100, "description": "缺货成本" }
+  ],
+  "outputs": [
+    { "key": "inventory_levels", "label": "三种策略库存水平", "type": "series", "unit": "件" },
+    { "key": "response_time_compare", "label": "响应时间对比", "type": "compare", "unit": "天" },
+    { "key": "loss_compare", "label": "缺货/滞销损失对比", "type": "compare", "unit": "元" },
+    { "key": "best_decoupling_point", "label": "最优解耦点", "type": "scalar" },
+    { "key": "total_cost_compare", "label": "总成本对比", "type": "compare", "unit": "元" }
+  ],
+  "constraints": [
+    { "name": "pull_lead_ok", "expression": "pull_lead_time <= customer_wait_tolerance", "message": "拉动策略响应时间不能超过客户容忍等待时间" }
+  ]
+}

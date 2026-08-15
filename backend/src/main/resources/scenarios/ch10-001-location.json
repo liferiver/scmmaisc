@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH10", "name": "第十章 全球供应链", "sortNo": 10 },
+  "moduleId": "CH10-001",
+  "name": "全球供应链区位配置仿真",
+  "engineKey": "location",
+  "difficulty": "advanced",
+  "classHours": 3,
+  "isRolePlay": true,
+  "concept": "全球化驱动力(市场/技术/成本/政治经济)、区位选择、集中vs分散",
+  "description": "跨国公司全球布局决策 → 候选国家/地区(各有不同的劳动力成本/税率/关税/基础设施/政治风险) → 产品特征(全球标准化 vs 区域本地化) → 决策(生产基地位置/区域 DC 数量/集中化程度) → 量化(总成本/响应时间/风险暴露)。教学前置提示：建议先学习 7.1 供应链网络设计（不在首期清单，不阻断仿真运行）",
+  "deps": [],
+  "params": [
+    { "key": "production_location", "label": "生产基地区位", "type": "enum", "default": "china", "options": [ { "label": "中国", "value": "china" }, { "label": "越南", "value": "vietnam" }, { "label": "印度", "value": "india" }, { "label": "墨西哥", "value": "mexico" }, { "label": "东欧", "value": "eastern_europe" }, { "label": "美国", "value": "usa" } ], "description": "候选区位" },
+    { "key": "dc_count", "label": "区域配送中心数量", "type": "int", "unit": "个", "min": 1, "max": 10, "step": 1, "default": 3, "description": "区域 DC 数量" },
+    { "key": "product_type", "label": "产品类型", "type": "enum", "default": "standardized", "options": [ { "label": "全球标准化", "value": "standardized" }, { "label": "区域本地化", "value": "localized" } ], "description": "标准化可集中生产" },
+    { "key": "tariff_rate", "label": "平均关税税率", "type": "float", "min": 0, "max": 0.25, "step": 0.01, "default": 0.1, "description": "对目标市场的关税" },
+    { "key": "fx_volatility", "label": "汇率年化波动率", "type": "float", "min": 0.02, "max": 0.15, "step": 0.01, "default": 0.05, "description": "汇率波动" },
+    { "key": "labor_cost_index", "label": "劳动力成本指数", "type": "float", "min": 0.5, "max": 2.0, "step": 0.05, "default": 1.0, "description": "相对指数（中国=1，越高越贵）" },
+    { "key": "tax_rate", "label": "企业所得税率", "type": "float", "min": 0.1, "max": 0.35, "step": 0.01, "default": 0.25, "description": "生产区位所得税率" }
+  ],
+  "outputs": [
+    { "key": "total_cost_compare", "label": "各方案总成本", "type": "compare", "unit": "亿元" },
+    { "key": "after_tax_profit", "label": "税后利润", "type": "compare", "unit": "亿元" },
+    { "key": "risk_weighted_cost", "label": "风险加权成本", "type": "scalar", "unit": "亿元" },
+    { "key": "response_time_compare", "label": "供应链响应时间", "type": "compare", "unit": "天" },
+    { "key": "tariff_saving", "label": "关税优化空间", "type": "scalar", "unit": "亿元" }
+  ],
+  "constraints": [
+    { "name": "min_two_sites", "expression": "sites >= 2", "message": "至少选择 2 个及以上候选区位以分散风险" }
+  ]
+}

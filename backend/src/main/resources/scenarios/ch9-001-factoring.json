@@ -1,0 +1,33 @@
+{
+  "chapter": { "code": "CH9", "name": "第九章 供应链金融", "sortNo": 9 },
+  "moduleId": "CH9-001",
+  "name": "应收账款融资（保理）仿真",
+  "engineKey": "factoring",
+  "difficulty": "basic",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "应收账款融资、保理(Factoring)、质押率、核心企业确权、融资利率、追索权",
+  "description": "中小供应商向核心企业供货→形成应收账款(30-90 天账期) → 供应商向银行申请应收账款融资 → 银行核实(应收账款真实性/贸易背景/历史履约) → 审批(质押率 60-80%×应收账款额→放款) → 核心企业到期付款至银行监管账户→银行扣除本息→余款退还供应商",
+  "deps": [],
+  "params": [
+    { "key": "receivable_amount", "label": "应收账款金额", "type": "float", "unit": "万元", "min": 100, "max": 10000, "step": 100, "default": 1000, "description": "单笔/多笔应收" },
+    { "key": "receivables_period", "label": "账期", "type": "int", "unit": "天", "min": 30, "max": 180, "step": 10, "default": 90, "description": "应收账款剩余天数" },
+    { "key": "pledge_rate", "label": "质押率", "type": "float", "min": 0.6, "max": 0.8, "step": 0.01, "default": 0.7, "description": "银行贷款比例" },
+    { "key": "financing_rate", "label": "融资利率", "type": "float", "min": 0.04, "max": 0.12, "step": 0.005, "default": 0.06, "description": "年化利率，基于核心企业信用" },
+    { "key": "credit_rating", "label": "核心企业信用评级", "type": "enum", "default": "AA", "options": [ { "label": "AAA", "value": "AAA" }, { "label": "AA", "value": "AA" }, { "label": "A", "value": "A" }, { "label": "BBB", "value": "BBB" } ], "description": "影响放款意愿和利率" },
+    { "key": "default_probability", "label": "核心企业违约概率", "type": "float", "min": 0.001, "max": 0.05, "step": 0.001, "default": 0.01, "description": "对应评级" },
+    { "key": "recourse_type", "label": "追索权类型", "type": "enum", "default": "recourse", "options": [ { "label": "有追索权", "value": "recourse" }, { "label": "无追索权", "value": "non_recourse" } ], "description": "供应商是否承担回购义务" },
+    { "key": "historical_performance", "label": "历史履约率", "type": "float", "min": 0.85, "max": 1.0, "step": 0.01, "default": 0.95, "description": "影响审批" }
+  ],
+  "outputs": [
+    { "key": "finance_amount", "label": "融资金额", "type": "scalar", "unit": "万元" },
+    { "key": "finance_cost", "label": "融资成本", "type": "scalar", "unit": "元" },
+    { "key": "bank_expected_loss", "label": "银行期望损失", "type": "scalar", "unit": "元" },
+    { "key": "cashflow_improvement_days", "label": "供应商现金流改善天数", "type": "scalar", "unit": "天" },
+    { "key": "default_loss_compare", "label": "违约情景损失", "type": "compare", "unit": "元" }
+  ],
+  "constraints": [
+    { "name": "receivable_valid", "expression": "confirmed_by_core = true", "message": "应收账款需真实有效并经核心企业确权" },
+    { "name": "pledge_ratio_ok", "expression": "pledge_rate <= 0.8", "message": "质押率不得超过 80%" }
+  ]
+}

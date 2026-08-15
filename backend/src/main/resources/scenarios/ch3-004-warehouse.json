@@ -1,0 +1,32 @@
+{
+  "chapter": { "code": "CH3", "name": "第三章 物流技术与信息系统", "sortNo": 3 },
+  "moduleId": "CH3-004",
+  "name": "仓储全流程作业仿真",
+  "engineKey": "warehouse",
+  "difficulty": "basic",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "入库验收上架、库内保管盘点、出库拣选发货、FIFO/FEFO",
+  "description": "入库：车辆到达→卸货→质检→扫码/贴标→系统分配库位→上架；保管：库存监控→效期管理(FIFO/FEFO)→循环盘点→库位优化；出库：订单拣选(播种式/摘果式)→复核包装→集货装车→发运",
+  "deps": [],
+  "params": [
+    { "key": "daily_inbound", "label": "日入库量", "type": "int", "unit": "件/托盘", "min": 100, "max": 10000, "step": 100, "default": 2000, "description": "入库作业量" },
+    { "key": "daily_outbound", "label": "日出库量", "type": "int", "unit": "件/订单", "min": 100, "max": 10000, "step": 100, "default": 2000, "description": "出库作业量" },
+    { "key": "sku_count", "label": "SKU数", "type": "int", "unit": "种", "min": 100, "max": 50000, "step": 100, "default": 5000, "description": "影响库位复杂度" },
+    { "key": "picking_mode", "label": "拣选模式", "type": "enum", "default": "order", "options": [ { "label": "摘果式", "value": "order" }, { "label": "播种式", "value": "batch" }, { "label": "混合", "value": "mixed" } ], "description": "按订单/按商品拣选" },
+    { "key": "slotting_strategy", "label": "库位策略", "type": "enum", "default": "abc", "options": [ { "label": "随机", "value": "random" }, { "label": "固定", "value": "fixed" }, { "label": "ABC分类", "value": "abc" } ], "description": "A 类近出口" },
+    { "key": "cycle_count_period", "label": "盘点周期", "type": "int", "unit": "天", "min": 1, "max": 30, "step": 1, "default": 7, "description": "循环盘点频率" },
+    { "key": "inspection_rate", "label": "质检抽检比例", "type": "float", "min": 0.01, "max": 0.3, "step": 0.01, "default": 0.1, "description": "入库抽检率" }
+  ],
+  "outputs": [
+    { "key": "inbound_processing_time", "label": "入库处理时长", "type": "series", "unit": "小时" },
+    { "key": "picking_efficiency", "label": "拣选效率", "type": "scalar", "unit": "行/人时" },
+    { "key": "inventory_accuracy", "label": "库存准确率", "type": "gauge", "unit": "%" },
+    { "key": "outbound_error_rate", "label": "出库差错率", "type": "scalar", "unit": "%" },
+    { "key": "capacity_utilization", "label": "库容利用率", "type": "gauge", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "flow_balance", "expression": "inbound = outbound + delta_inventory", "message": "日入库量需等于日出库量与库存变化之和" },
+    { "name": "accuracy_99", "expression": "inventory_accuracy > 0.99", "message": "库存准确率需高于 99%" }
+  ]
+}

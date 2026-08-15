@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH1", "name": "第一章 概论", "sortNo": 1 },
+  "moduleId": "CH1-004",
+  "name": "自营/3PL/物流联盟/4PL模式对比",
+  "engineKey": "mode-compare",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "四种物流业务模式、核心竞争力、外包决策、交易成本理论",
+  "description": "企业特征输入 → 物流需求分析 → 模式评估（自营：高固定低可变 / 3PL：按量付费低管控 / 联盟：共享利益绑定 / 4PL：整合优化强依赖）→ 成本-服务-风险三维对比 → 最优模式推荐",
+  "deps": [],
+  "params": [
+    { "key": "annual_volume", "label": "年物流量", "type": "int", "unit": "吨/票", "min": 10000, "max": 10000000, "step": 10000, "default": 100000, "description": "规模决定固定成本分摊" },
+    { "key": "self_fixed_invest", "label": "自营固定投资", "type": "float", "unit": "万元", "min": 100, "max": 100000, "step": 100, "default": 5000, "description": "仓库/车队/系统投入" },
+    { "key": "self_variable_cost", "label": "自营单位变动成本", "type": "float", "unit": "元/吨公里", "min": 1, "max": 100, "step": 0.5, "default": 20, "description": "自营可变成本" },
+    { "key": "third_party_unit_price", "label": "3PL单价", "type": "float", "unit": "元/吨公里", "min": 1, "max": 100, "step": 0.5, "default": 25, "description": "3PL 按量付费单价" },
+    { "key": "alliance_members", "label": "联盟成员数", "type": "int", "unit": "家", "min": 2, "max": 10, "step": 1, "default": 4, "description": "影响资源共享度" },
+    { "key": "fourth_party_fee_rate", "label": "4PL服务费率", "type": "float", "min": 0.05, "max": 0.15, "step": 0.01, "default": 0.1, "description": "货值或物流费的百分比" },
+    { "key": "service_level", "label": "服务要求", "type": "enum", "default": "standard", "options": [ { "label": "标准", "value": "standard" }, { "label": "较高", "value": "high" }, { "label": "极高", "value": "ultra" } ], "description": "排除低价低服务方案" }
+  ],
+  "outputs": [
+    { "key": "total_cost_compare", "label": "四种模式总成本对比", "type": "compare", "unit": "万元" },
+    { "key": "service_rates", "label": "服务达成率", "type": "compare", "unit": "%" },
+    { "key": "control_risk_scores", "label": "控制力/风险评分", "type": "compare", "unit": "分" },
+    { "key": "best_mode", "label": "最优模式推荐", "type": "scalar" }
+  ],
+  "constraints": [
+    { "name": "service_ok", "expression": "mode_service >= required_service", "message": "所选模式必须满足最低服务要求" }
+  ]
+}

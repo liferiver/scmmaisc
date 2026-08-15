@@ -1,0 +1,24 @@
+package com.scmmaisc.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+/**
+ * 异步执行配置（T023，R-04）：仿真运行在线程池中异步执行，
+ * 引擎步骤经 StepListener 逐条落库 simulation_log，前端轮询进度。
+ */
+@Configuration
+public class AsyncConfig {
+
+    @Bean("runExecutor")
+    public ThreadPoolTaskExecutor runExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(8);
+        executor.setQueueCapacity(200);
+        executor.setThreadNamePrefix("sim-run-");
+        executor.initialize();
+        return executor;
+    }
+}

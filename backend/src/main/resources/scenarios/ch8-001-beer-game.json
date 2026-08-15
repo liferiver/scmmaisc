@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH8", "name": "第八章 供应链协同", "sortNo": 8 },
+  "moduleId": "CH8-001",
+  "name": "啤酒游戏——牛鞭效应",
+  "engineKey": "beer-game",
+  "difficulty": "basic",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "长鞭效应(Bullwhip Effect)、需求信号扭曲、订单方差逐级放大",
+  "description": "4 级供应链：零售商→批发商→分销商→制造商；每轮下游向上游下订单→上游发货(有提前期)→计算库存/缺货成本；需求前 5 轮稳定(4 箱/周)，第 6 轮跳升至 8 箱并保持；信息约束：各级只知道下游订单，不知道最终客户需求(零售商除外)",
+  "deps": [],
+  "params": [
+    { "key": "levels", "label": "供应链级数", "type": "int", "unit": "级", "min": 3, "max": 5, "step": 1, "default": 4, "description": "通常 4 级" },
+    { "key": "initial_demand", "label": "初始需求", "type": "int", "unit": "箱/周", "min": 1, "max": 20, "step": 1, "default": 4, "description": "稳定期需求" },
+    { "key": "demand_jump", "label": "需求跳变", "type": "int", "unit": "箱/周", "min": 1, "max": 100, "step": 1, "default": 8, "description": "第 6 轮起需求" },
+    { "key": "lead_time", "label": "提前期", "type": "int", "unit": "轮", "min": 1, "max": 3, "step": 1, "default": 2, "description": "每级订单-收货延迟" },
+    { "key": "holding_cost", "label": "单位库存持有成本", "type": "float", "unit": "元/箱·轮", "min": 0.5, "max": 2, "step": 0.1, "default": 0.5, "description": "持有成本" },
+    { "key": "stockout_cost", "label": "单位缺货成本", "type": "float", "unit": "元/箱·轮", "min": 2, "max": 10, "step": 0.5, "default": 2, "description": "缺货罚金" },
+    { "key": "info_share", "label": "信息共享", "type": "bool", "default": false, "description": "零售商 POS 数据对上游可见" },
+    { "key": "demand_noise", "label": "需求随机噪声", "type": "float", "min": 0, "max": 2, "step": 0.1, "default": 0.5, "description": "每轮需求扰动幅度" },
+    { "key": "total_rounds", "label": "总轮数", "type": "int", "unit": "轮", "min": 30, "max": 50, "step": 1, "default": 50, "description": "仿真时长" }
+  ],
+  "outputs": [
+    { "key": "orders_series", "label": "各节点订单量时间序列", "type": "series", "unit": "箱" },
+    { "key": "inventory_series", "label": "各节点库存波动", "type": "series", "unit": "箱" },
+    { "key": "bullwhip_index", "label": "牛鞭效应指数", "type": "compare" },
+    { "key": "total_cost", "label": "总成本", "type": "scalar", "unit": "元" },
+    { "key": "stockout_counts", "label": "各节点缺货次数", "type": "series", "unit": "次" }
+  ],
+  "constraints": []
+}

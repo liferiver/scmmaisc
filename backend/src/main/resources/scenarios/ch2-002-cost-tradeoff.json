@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH2", "name": "第二章 物流系统控制", "sortNo": 2 },
+  "moduleId": "CH2-002",
+  "name": "物流成本背反动态仿真",
+  "engineKey": "cost-tradeoff",
+  "difficulty": "basic",
+  "classHours": 2,
+  "isRolePlay": false,
+  "concept": "效益背反(二律背反)、冰山理论、总成本分析(Total Cost Analysis)",
+  "description": "给定客户服务水平 → 配置物流网络参数（仓库数/库存水平/运输方式）→ 各环节成本联动计算（仓库数↑→运输成本↓但库存持有成本↑；库存水平↑→持有成本↑但缺货成本↓；服务水平↑→收入↑但物流成本非线性↑）→ 寻找总成本最低点",
+  "deps": [],
+  "params": [
+    { "key": "annual_demand", "label": "年需求量", "type": "int", "unit": "单位/年", "min": 10000, "max": 1000000, "step": 10000, "default": 100000, "description": "总需求单元数" },
+    { "key": "warehouse_candidates", "label": "仓库候选数量", "type": "int", "unit": "个", "min": 1, "max": 20, "step": 1, "default": 10, "description": "可设仓库数" },
+    { "key": "warehouse_fixed_cost", "label": "单仓固定成本", "type": "float", "unit": "元/年·仓", "min": 50000, "max": 5000000, "step": 50000, "default": 500000, "description": "仓库固定运营成本" },
+    { "key": "holding_cost", "label": "单位库存持有成本", "type": "float", "unit": "元/单位·年", "min": 1, "max": 500, "step": 1, "default": 50, "description": "库存持有成本" },
+    { "key": "transport_rate", "label": "运输费率", "type": "float", "unit": "元/吨公里", "min": 0.1, "max": 10, "step": 0.1, "default": 2, "description": "运输成本费率" },
+    { "key": "stockout_loss", "label": "缺货单位损失", "type": "float", "unit": "元/单位", "min": 1, "max": 100, "step": 1, "default": 20, "description": "缺货造成的单位损失" },
+    { "key": "service_level_target", "label": "服务水平目标", "type": "float", "min": 0.9, "max": 0.999, "step": 0.001, "default": 0.97, "description": "CSL 目标" }
+  ],
+  "outputs": [
+    { "key": "tradeoff_curve", "label": "运输vs库存成本背反曲线", "type": "compare", "unit": "元" },
+    { "key": "total_cost_curve", "label": "总成本U形曲线", "type": "series", "unit": "元" },
+    { "key": "optimal_warehouses", "label": "最优仓库数", "type": "scalar", "unit": "个" },
+    { "key": "cost_structure", "label": "成本构成", "type": "compare", "unit": "元" }
+  ],
+  "constraints": [
+    { "name": "service_target_ok", "expression": "actual_service >= service_level_target", "message": "实际服务水平不能低于目标服务水平" }
+  ]
+}

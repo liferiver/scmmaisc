@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH8", "name": "第八章 供应链协同", "sortNo": 8 },
+  "moduleId": "CH8-004",
+  "name": "批发价格合同与双重边际效应仿真",
+  "engineKey": "contract",
+  "difficulty": "basic",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "批发价格合同、双重边际效应(Double Marginalization)、Stackelberg 博弈",
+  "description": "供应商-零售商两阶段博弈：Stage 1 供应商(领导者)选择批发价 w(基于对零售商反应的预期)；Stage 2 零售商(跟随者)基于 w 选择订货量 q(或零售价 p)；需求函数 D(p)=a-bp；双重边际：双方各自加价→总利润<集中决策总利润",
+  "deps": [],
+  "params": [
+    { "key": "market_size_a", "label": "需求函数参数a", "type": "float", "min": 100, "max": 1000, "step": 10, "default": 500, "description": "市场规模" },
+    { "key": "price_sensitivity_b", "label": "需求函数参数b", "type": "float", "min": 1, "max": 10, "step": 0.5, "default": 2, "description": "价格敏感度" },
+    { "key": "unit_cost_c", "label": "生产成本", "type": "float", "unit": "元", "min": 10, "max": 100, "step": 1, "default": 30, "description": "供应商制造成本 c" },
+    { "key": "retail_price_p", "label": "零售价", "type": "float", "unit": "元", "min": 10, "max": 200, "step": 1, "default": 100, "description": "零售商决策，需满足 p > w" },
+    { "key": "wholesale_price_w", "label": "批发价", "type": "float", "unit": "元", "min": 10, "max": 200, "step": 1, "default": 60, "description": "供应商决策，需满足 w > c 且 w < p" }
+  ],
+  "outputs": [
+    { "key": "supplier_profit", "label": "供应商利润", "type": "scalar", "unit": "元" },
+    { "key": "retailer_profit", "label": "零售商利润", "type": "scalar", "unit": "元" },
+    { "key": "total_profit", "label": "供应链总利润", "type": "scalar", "unit": "元" },
+    { "key": "efficiency_loss", "label": "双重边际效率损失", "type": "scalar", "unit": "%" },
+    { "key": "centralized_vs_decentralized", "label": "集中vs分散对比", "type": "compare", "unit": "元" }
+  ],
+  "constraints": [
+    { "name": "w_gt_c", "expression": "wholesale_price_w > unit_cost_c", "message": "批发价必须高于生产成本" },
+    { "name": "p_gt_w", "expression": "retail_price_p > wholesale_price_w", "message": "零售价必须高于批发价" },
+    { "name": "profit_positive", "expression": "supplier_profit > 0 and retailer_profit > 0", "message": "各方利润必须为正" }
+  ]
+}

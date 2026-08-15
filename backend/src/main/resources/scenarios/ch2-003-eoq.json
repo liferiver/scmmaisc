@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH2", "name": "第二章 物流系统控制", "sortNo": 2 },
+  "moduleId": "CH2-003",
+  "name": "EOQ经济订货批量",
+  "engineKey": "eoq",
+  "difficulty": "intro",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "EOQ、订货成本、持有成本、再订货点(ROP)、Q*=√(2·C2·D/C1)",
+  "description": "输入需求/成本参数 → Q*公式计算 → 模拟逐日库存消耗 → 库存达到 ROP 时触发订货 → 提前期后到货 → 循环 → 对比不同 Q 值下的年总成本",
+  "deps": [],
+  "params": [
+    { "key": "annual_demand", "label": "年需求量", "type": "int", "unit": "单位/年", "min": 100, "max": 100000, "step": 100, "default": 10000, "description": "全年总需求量 D" },
+    { "key": "order_cost", "label": "单次订货成本", "type": "float", "unit": "元/次", "min": 10, "max": 5000, "step": 10, "default": 100, "description": "单次订货成本 C2" },
+    { "key": "holding_cost", "label": "单位年持有成本", "type": "float", "unit": "元/单位·年", "min": 1, "max": 500, "step": 1, "default": 2, "description": "单位年持有成本 C1" },
+    { "key": "lead_time", "label": "提前期", "type": "float", "unit": "天", "min": 1, "max": 30, "step": 1, "default": 7, "description": "提前期 L" },
+    { "key": "order_qty", "label": "订货批量", "type": "float", "unit": "件", "min": 0, "max": 100000, "step": 100, "default": 0, "description": "订货批量 Q；0 表示自动取 Q*，非 0 时须偏离 Q* 不超过 ±50%" }
+  ],
+  "outputs": [
+    { "key": "q_star", "label": "EOQ最优订货量", "type": "scalar", "unit": "件" },
+    { "key": "annual_cost_curve", "label": "年总成本曲线", "type": "series", "unit": "元" },
+    { "key": "order_count", "label": "年订货次数", "type": "scalar", "unit": "次/年" },
+    { "key": "avg_inventory", "label": "平均库存水平", "type": "scalar", "unit": "件" },
+    { "key": "rop", "label": "再订货点", "type": "scalar", "unit": "件" }
+  ],
+  "constraints": [
+    { "name": "q_gt_zero", "expression": "order_qty >= 0", "message": "订货批量 Q 必须大于 0" },
+    { "name": "q_near_star", "expression": "0.5*Q* <= Q <= 1.5*Q*", "message": "订货量偏离 Q* 不得超过 ±50%" },
+    { "name": "no_stockout", "expression": "safety_stock >= 0", "message": "不允许缺货，安全库存需 ≥ 0" }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "chapter": { "code": "CH1", "name": "第一章 概论", "sortNo": 1 },
+  "moduleId": "CH1-002",
+  "name": "物流7R服务目标履约",
+  "engineKey": "seven-r",
+  "difficulty": "intro",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "7R目标(Right Product/Quantity/Condition/Place/Time/Customer/Cost)、服务水平权衡",
+  "description": "订单接收 → 产品匹配检查 → 数量核验 → 品质确认 → 目的地分配 → 时效承诺 → 客户匹配 → 成本核算 → 7R综合履约评分",
+  "deps": [],
+  "params": [
+    { "key": "order_volume", "label": "订单量", "type": "int", "unit": "单/轮", "min": 50, "max": 500, "step": 10, "default": 200, "description": "每轮订单数" },
+    { "key": "sku_count", "label": "产品SKU数", "type": "int", "unit": "种", "min": 10, "max": 200, "step": 10, "default": 100, "description": "产品种类" },
+    { "key": "inventory_accuracy", "label": "库存准确率", "type": "float", "min": 0.9, "max": 1.0, "step": 0.01, "default": 0.98, "description": "影响产品/数量正确性" },
+    { "key": "quality_rate", "label": "品质合格率", "type": "float", "min": 0.9, "max": 1.0, "step": 0.01, "default": 0.97, "description": "影响品质目标" },
+    { "key": "delivery_on_time_rate", "label": "配送准时率", "type": "float", "min": 0.8, "max": 1.0, "step": 0.01, "default": 0.95, "description": "影响时间/地点目标" },
+    { "key": "cost_per_order_limit", "label": "单均成本上限", "type": "float", "unit": "元/单", "min": 10, "max": 200, "step": 5, "default": 60, "description": "成本约束" }
+  ],
+  "outputs": [
+    { "key": "seven_r_score", "label": "7R综合达成率", "type": "gauge", "unit": "%" },
+    { "key": "r_rates", "label": "各R达成率", "type": "compare", "unit": "%" },
+    { "key": "violation_dist", "label": "违约订单分布", "type": "dist", "unit": "单" }
+  ],
+  "constraints": [
+    { "name": "budget_ok", "expression": "avg_cost <= cost_per_order_limit", "message": "单均履约成本不能超过成本上限" },
+    { "name": "five_r_qualified", "expression": "count(r_rate >= 0.95) >= 5", "message": "7R 中至少 5 项达成率需高于 95%" }
+  ]
+}

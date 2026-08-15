@@ -1,0 +1,37 @@
+{
+  "chapter": { "code": "CH5", "name": "第五章 跨境物流管理", "sortNo": 5 },
+  "moduleId": "CH5-001",
+  "name": "跨境物流三段式运输仿真",
+  "engineKey": "cross-border",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "跨境三段式(出口报关→国际运输→进口清关)、全程可视化",
+  "description": "境内段：工厂→国内运输→出口报关(申报/查验/放行)→出口口岸；跨境段：国际运输(海运/空运/铁路/公路)→目的国口岸；境外段：进口清关(申报/查验/缴税/放行)→境外运输→最终交付",
+  "deps": [],
+  "params": [
+    { "key": "trade_channel", "label": "贸易通道", "type": "enum", "default": "cn_us", "options": [ { "label": "中→美", "value": "cn_us" }, { "label": "中→欧", "value": "cn_eu" }, { "label": "中→东盟", "value": "cn_asean" }, { "label": "中→日韩", "value": "cn_jpkr" } ], "description": "不同贸易通道" },
+    { "key": "transport_mode", "label": "运输方式", "type": "enum", "default": "sea", "options": [ { "label": "海运", "value": "sea" }, { "label": "空运", "value": "air" }, { "label": "铁路", "value": "rail" }, { "label": "公路", "value": "road" }, { "label": "多式联运", "value": "multimodal" } ], "description": "跨境段模式" },
+    { "key": "export_clearance_time", "label": "出口报关时间", "type": "dist", "fields": [
+      { "key": "mean", "label": "均值", "type": "float", "unit": "天", "min": 0.5, "max": 7, "step": 0.1, "default": 2 },
+      { "key": "sd", "label": "标准差", "type": "float", "unit": "天", "min": 0.1, "max": 2, "step": 0.1, "default": 0.5 }
+    ], "description": "中国出口通关时长分布" },
+    { "key": "import_clearance_time", "label": "进口清关时间", "type": "dist", "fields": [
+      { "key": "mean", "label": "均值", "type": "float", "unit": "天", "min": 1, "max": 14, "step": 0.1, "default": 3 },
+      { "key": "sd", "label": "标准差", "type": "float", "unit": "天", "min": 0.2, "max": 3, "step": 0.1, "default": 1 }
+    ], "description": "目的国通关时长分布" },
+    { "key": "inspection_probability", "label": "海关查验概率", "type": "float", "min": 0.01, "max": 0.1, "step": 0.01, "default": 0.05, "description": "开箱查验率" },
+    { "key": "tariff_rate", "label": "关税税率", "type": "float", "min": 0, "max": 0.25, "step": 0.01, "default": 0.1, "description": "目的国税率" },
+    { "key": "goods_category", "label": "商品类别", "type": "enum", "default": "general", "options": [ { "label": "一般贸易", "value": "general" }, { "label": "跨境电商", "value": "cross_ecommerce" }, { "label": "个人物品", "value": "personal" } ], "description": "影响税率和通关" }
+  ],
+  "outputs": [
+    { "key": "segment_times", "label": "三段总耗时", "type": "series", "unit": "天" },
+    { "key": "segment_share", "label": "各段耗时占比", "type": "gauge", "unit": "%" },
+    { "key": "journey_nodes", "label": "全程可视化节点", "type": "topo" },
+    { "key": "delay_risk", "label": "延误风险概率", "type": "scalar", "unit": "%" },
+    { "key": "total_cost", "label": "全程物流成本", "type": "scalar", "unit": "元" }
+  ],
+  "constraints": [
+    { "name": "compliance", "expression": "documents_complete = true", "message": "必须满足目的国合规与单证要求" }
+  ]
+}

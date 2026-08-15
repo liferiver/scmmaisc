@@ -1,0 +1,28 @@
+{
+  "chapter": { "code": "CH6", "name": "第六章 供应链管理", "sortNo": 6 },
+  "moduleId": "CH6-002",
+  "name": "核心竞争力识别与外包决策仿真",
+  "engineKey": "outsourcing",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "核心竞争力、VRIO模型、自制vs外购、外包风险",
+  "description": "企业业务活动分解(价值链分析) → 每项活动评估(VRIO：价值/稀缺/模仿难度/组织) → 识别核心竞争力(所有 VRIO 均高的活动) → 非核心活动→外包可行性评估(市场成熟度/供应商能力/转换成本) → 自制/外包决策矩阵",
+  "deps": [ "CH1-004" ],
+  "params": [
+    { "key": "activity_count", "label": "业务活动数", "type": "int", "unit": "项", "min": 5, "max": 15, "step": 1, "default": 5, "description": "价值链环节数" },
+    { "key": "activity_vrio", "label": "各活动VRIO评分", "type": "matrix", "default": [ [ 4, 4, 4, 3 ], [ 3, 3, 2, 3 ], [ 3, 2, 2, 2 ], [ 2, 2, 2, 2 ], [ 2, 1, 1, 2 ] ], "description": "行=活动，列=价值/稀缺/模仿难度/组织，评分 1-5" },
+    { "key": "market_maturity", "label": "外包市场成熟度", "type": "float", "min": 0, "max": 1, "step": 0.1, "default": 0.7, "description": "该活动是否有成熟的 3PL 市场" },
+    { "key": "switching_cost", "label": "外包转换成本", "type": "float", "unit": "万元", "min": 1, "max": 100, "step": 1, "default": 20, "description": "切换供应商的成本" },
+    { "key": "quality_control_difficulty", "label": "质量控制难度", "type": "float", "min": 1, "max": 5, "step": 0.5, "default": 3, "description": "外包后质量管控难度" }
+  ],
+  "outputs": [
+    { "key": "core_competencies", "label": "核心竞争力清单", "type": "scalar" },
+    { "key": "decision_matrix", "label": "自制/外包决策矩阵", "type": "heatmap" },
+    { "key": "outsourcing_risk", "label": "外包风险暴露", "type": "gauge", "unit": "分" },
+    { "key": "cost_compare", "label": "自制vs外包成本对比", "type": "compare", "unit": "万元" }
+  ],
+  "constraints": [
+    { "name": "core_inhouse", "expression": "core_competency = inhouse", "message": "核心竞争力必须自制，不得外包" }
+  ]
+}

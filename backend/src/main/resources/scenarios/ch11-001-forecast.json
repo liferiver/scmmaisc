@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH11", "name": "第十一章 现代物流与供应链发展", "sortNo": 11 },
+  "moduleId": "CH11-001",
+  "name": "时间序列需求预测方法对比仿真",
+  "engineKey": "forecast",
+  "difficulty": "basic",
+  "classHours": 2,
+  "isRolePlay": false,
+  "concept": "时间序列预测、移动平均、指数平滑、Holt-Winters、预测误差度量(MAD/MSE/MAPE)",
+  "description": "给定历史需求数据(含趋势/季节性/噪声) → 划分训练集/测试集 → 应用多种方法(简单移动平均/单指数平滑/双指数平滑 Holt/三指数平滑 Holt-Winters) → 计算各方法的预测值和误差 → 对比精度 → 选择最优方法",
+  "deps": [],
+  "params": [
+    { "key": "periods", "label": "历史需求期数", "type": "int", "unit": "期", "min": 36, "max": 120, "step": 6, "default": 60, "description": "生成的序列长度" },
+    { "key": "trend_strength", "label": "趋势强度", "type": "float", "min": 0, "max": 0.1, "step": 0.005, "default": 0.05, "description": "每期趋势斜率" },
+    { "key": "season_period", "label": "季节周期", "type": "int", "unit": "期", "min": 4, "max": 12, "step": 1, "default": 12, "description": "季度(4)或月度(12)" },
+    { "key": "season_amplitude", "label": "季节振幅", "type": "float", "min": 0.1, "max": 0.5, "step": 0.05, "default": 0.3, "description": "季节波动幅度" },
+    { "key": "noise_level", "label": "噪声水平", "type": "float", "min": 0.05, "max": 0.3, "step": 0.01, "default": 0.10, "description": "随机噪声 σ" },
+    { "key": "train_ratio", "label": "训练集比例", "type": "float", "min": 0.5, "max": 0.9, "step": 0.05, "default": 0.7, "description": "训练/测试分割" },
+    { "key": "forecast_method", "label": "预测方法", "type": "enum", "default": "all", "options": [ { "label": "全部方法对比", "value": "all" }, { "label": "简单移动平均", "value": "ma" }, { "label": "单指数平滑", "value": "ses" }, { "label": "双指数平滑", "value": "holt" }, { "label": "三指数平滑", "value": "holt_winters" } ], "description": "参与对比的方法" }
+  ],
+  "outputs": [
+    { "key": "error_compare", "label": "各方法MAD/MSE/MAPE", "type": "compare" },
+    { "key": "forecast_curve", "label": "预测vs实际曲线", "type": "series", "unit": "件" },
+    { "key": "prediction_interval", "label": "预测区间", "type": "series", "unit": "件" },
+    { "key": "best_method", "label": "最优方法推荐", "type": "scalar" }
+  ],
+  "constraints": [
+    { "name": "mape_usable", "expression": "MAPE < 0.2", "message": "所选方法 MAPE 需低于 20% 方为可用" }
+  ]
+}
