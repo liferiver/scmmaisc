@@ -1,0 +1,62 @@
+# SCMM-AISC 一键部署编排（MySQL + 后端 + 前端）
+#
+# 用法：
+#   docker compose up -d --build     # 构建并启动
+#   docker compose ps                # 查看状态
+#   docker compose logs -f backend   # 跟踪后端日志
+#   docker compose down              # 停止（保留数据卷）
+#   docker compose down -v           # 停止并删除数据卷（数据清空！）
+#
+# 访问：
+#   前端  http://localhost:8088
+#   后端  http://localhost:8080（API：http://localhost:8080/api/health）
+#
+# 配置：复制 .env.example 为 .env 修改 MYSQL_ROOT_PASSWORD（生产环境务必修改）
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: scmmaisc-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-scmmaisc123}
+      MYSQL_DATABASE: scmmaisc
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  backend:
+    build: ./backend
+    container_name: scmmaisc-backend
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/scmmaisc?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-scmmaisc123}
+      TZ: Asia/Shanghai
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    container_name: scmmaisc-frontend
+    restart: unless-stopped
+    ports:
+      - "8088:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:

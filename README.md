@@ -40,6 +40,8 @@
 
 ```
 ├── backend/
+│   ├── Dockerfile              # 多阶段构建：maven 打包 → JRE 运行
+│   ├── .dockerignore
 │   ├── src/main/java/com/scmmaisc/
 │   │   ├── controller/        # C1–C8 REST 接口
 │   │   ├── service/           # 运行/场景/日志/保留清理
@@ -50,11 +52,16 @@
 │       ├── db/schema.sql      # 幂等建表
 │       └── scenarios/*.json   # 15 个场景定义（启动装载）
 ├── frontend/
+│   ├── Dockerfile              # 多阶段构建：vue-tsc + vite 打包 → nginx 运行
+│   ├── nginx.conf              # 静态服务 + history 回退 + /api 代理
+│   ├── .dockerignore
 │   ├── src/views/             # 目录 / 场景详情 / 运行 / 方案对比
 │   ├── src/components/        # ParamPanel / StepTimeline / OutputChart / ExportButton / SavePlanDialog
 │   ├── src/stores/            # scenarioStore / runStore / planStore
 │   ├── src/api/  src/utils/  src/types/
 │   └── tests/                 # Vitest 组件与 stores 测试
+├── docker-compose.yml           # 一键编排：mysql + backend + frontend
+├── .env.example                 # 环境变量模板（复制为 .env 使用）
 ├── specs/001-scm-sim-platform/  # 需求/契约/任务/验收（Spec-Driven 工件）
 └── docs/                        # 教学场景列表 V2、教学大纲、学生使用说明
 ```
@@ -101,6 +108,42 @@ cd backend; mvn test        # 引擎算例/复现/极端参数 + 服务层 + Moc
 cd frontend; npm run test   # 组件与 stores 单元测试
 cd frontend; npm run build  # 类型检查（vue-tsc）+ 生产构建
 ```
+
+## Docker 一键部署
+
+前置要求：Docker 24+（含 Compose v2）。无需本机安装 JDK/Node/MySQL，三个容器（mysql + backend + frontend）一条命令拉起。
+
+```bash
+# 1.（可选）按需修改数据库口令：复制 .env.example 为 .env 并编辑
+cp .env.example .env
+
+# 2. 构建并启动（首次构建需拉取基础镜像与依赖，耗时几分钟）
+docker compose up -d --build
+
+# 3. 验证
+docker compose ps              # 三个服务均应为 running/healthy
+curl http://localhost:8080/api/health   # {"code":0,...,"data":{"status":"UP","db":"UP"}}
+```
+
+访问 http://localhost:8088 即可使用（前端 Nginx 已将 `/api` 反向代理到后端容器）。
+
+| 服务 | 容器内 | 宿主机端口 | 说明 |
+|---|---|---|---|
+| mysql | 3306 | 不对外 | MySQL 8（utf8mb4），数据持久化在命名卷 `mysql-data` |
+| backend | 8080 | 8080 | Spring Boot，启动自动建表并装载 15 个场景 |
+| frontend | 80 | 8088 | Nginx 静态站点 + `/api` 代理 |
+
+常用运维命令：
+
+```bash
+docker compose logs -f backend   # 跟踪后端日志（可见 “Scenarios loaded: 15”）
+docker compose down              # 停止（数据卷保留，下次 up 数据仍在）
+docker compose down -v           # 停止并删除数据卷（⚠️ 运行记录与日志将清空）
+docker compose up -d --build     # 代码变更后重建镜像并热替换
+```
+
+> **安全提示**：默认口令 `scmmaisc123` 仅用于本地体验；部署到可被他人访问的环境前，务必在 `.env` 中设置强口令（`.env` 已被 .gitignore 忽略，不会入库）。
+> 若宿主机 8080/8088 被占用，可修改 `docker-compose.yml` 中 `ports` 左侧宿主机端口，例如 `"8088:80"` → `"18088:80"`。
 
 ## 教学场景清单（首期 15 个）
 

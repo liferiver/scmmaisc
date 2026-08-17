@@ -1,0 +1,5 @@
+# 构建上下文瘦身（减少发送到 Docker daemon 的体积）
+target/
+*.log
+.idea/
+.vscode/
