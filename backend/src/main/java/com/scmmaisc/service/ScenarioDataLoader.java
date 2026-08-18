@@ -42,6 +42,7 @@ public class ScenarioDataLoader implements ApplicationRunner {
             log.warn("未发现场景定义文件（resources/scenarios/*.json），跳过数据装载");
             return;
         }
+        log.info("Scenarios loaded: {}", resources.length);
         int newChapters = 0;
         int newScenarios = 0;
         for (Resource resource : resources) {

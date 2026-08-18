@@ -293,6 +293,28 @@ class RunControllerTest {
                 .andExpect(jsonPath("$.message").value("服务器内部错误，请稍后重试"));
     }
 
+    @Test
+    @DisplayName("V11: 约束违反返回 400 + 具体原因（CH1-001 权重和≠1，服务端兑底）")
+    void constraintViolationRejected() throws Exception {
+        long id = insertTriangleScenario("CH1-001");
+
+        // 权重和 = 1.1 ≠ 1 → 400 + weight_sum 原因
+        Map<String, Object> bad = triangleParams();
+        bad.put("weight_tech", 0.3);
+        mockMvc.perform(post("/api/runs").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body(id, "client-1", bad, 42))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(40001))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("weight_sum")));
+
+        // 默认权重和 = 1 → 校验通过进入 RUNNING（202）
+        mockMvc.perform(post("/api/runs").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body(id, "client-1", triangleParams(), 42))))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.status").value("RUNNING"));
+    }
+
     // ---- 夹具与工具 ----
 
     private long insertScenario(String moduleId, String name, String engineKey) throws Exception {
@@ -327,6 +349,60 @@ class RunControllerTest {
         p.put("daily_demand", 27.4);
         p.put("order_qty", 0);
         return p;
+    }
+
+    private static Map<String, Object> triangleParams() {
+        Map<String, Object> p = new LinkedHashMap<>();
+        p.put("candidate_count", 10);
+        p.put("weight_tech", 0.2);
+        p.put("weight_quality", 0.2);
+        p.put("weight_response", 0.15);
+        p.put("weight_delivery", 0.15);
+        p.put("weight_cost", 0.2);
+        p.put("weight_environment", 0.1);
+        p.put("pass_threshold", 75.0);
+        p.put("sample_pass_rate", 0.85);
+        p.put("audit_items", 25);
+        return p;
+    }
+
+    /** 供应商铁三角场景夹具（engineKey 指向真实执行器，含 weight_sum 约束）。 */
+    private long insertTriangleScenario(String moduleId) throws Exception {
+        Chapter chapter = new Chapter();
+        chapter.setCode("CH1");
+        chapter.setName("概论");
+        chapter.setSortNo(1);
+        chapterMapper.insert(chapter);
+
+        Scenario scenario = new Scenario();
+        scenario.setChapterId(chapter.getId());
+        scenario.setModuleId(moduleId);
+        scenario.setName("供应商铁三角");
+        scenario.setEngineKey("supplier-triangle");
+        scenario.setDifficulty("intro");
+        scenario.setClassHours(1);
+        scenario.setIsRolePlay(true);
+        scenario.setConcept("概念");
+        scenario.setDescription("流程");
+        scenario.setDeps("[]");
+        scenario.setParams(objectMapper.writeValueAsString(List.of(
+                Map.of("key", "candidate_count", "label", "候选供应商数量", "type", "int", "min", 5, "max", 50, "default", 10),
+                Map.of("key", "weight_tech", "label", "技术维度权重", "type", "float", "min", 0, "max", 1, "default", 0.2),
+                Map.of("key", "weight_quality", "label", "质量维度权重", "type", "float", "min", 0, "max", 1, "default", 0.2),
+                Map.of("key", "weight_response", "label", "响应维度权重", "type", "float", "min", 0, "max", 1, "default", 0.15),
+                Map.of("key", "weight_delivery", "label", "交付维度权重", "type", "float", "min", 0, "max", 1, "default", 0.15),
+                Map.of("key", "weight_cost", "label", "成本维度权重", "type", "float", "min", 0, "max", 1, "default", 0.2),
+                Map.of("key", "weight_environment", "label", "环境维度权重", "type", "float", "min", 0, "max", 1, "default", 0.1),
+                Map.of("key", "pass_threshold", "label", "认证标准阈值", "type", "float", "min", 60, "max", 90, "default", 75),
+                Map.of("key", "sample_pass_rate", "label", "样品合格率", "type", "float", "min", 0, "max", 1, "default", 0.85),
+                Map.of("key", "audit_items", "label", "现场审核项数", "type", "int", "min", 10, "max", 50, "default", 25))));
+        scenario.setOutputs("[]");
+        scenario.setConstraints(objectMapper.writeValueAsString(List.of(
+                Map.of("name", "weight_sum", "expression",
+                        "weight_tech + weight_quality + weight_response + weight_delivery + weight_cost + weight_environment == 1",
+                        "message", "评估维度权重和必须等于 1"))));
+        scenarioMapper.insert(scenario);
+        return scenario.getId();
     }
 
     private static Map<String, Object> body(Long scenarioId, String clientId, Map<String, Object> params, long seed) {

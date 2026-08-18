@@ -100,7 +100,29 @@ class ScenarioCatalogControllerTest {
                 .andExpect(jsonPath("$.data.params[0].min").value(1))
                 .andExpect(jsonPath("$.data.outputs.length()").value(3))
                 .andExpect(jsonPath("$.data.outputs[0].type").value("scalar"))
-                .andExpect(jsonPath("$.data.constraints[0].message").isNotEmpty());
+                .andExpect(jsonPath("$.data.constraints[0].message").isNotEmpty())
+                // V11：非求和形态约束不下发为组约束（EOQ 的 q>0 为单参数比较）
+                .andExpect(jsonPath("$.data.constraintGroups").isArray())
+                .andExpect(jsonPath("$.data.constraintGroups.length()").value(0));
+    }
+
+    @Test
+    @DisplayName("C3: 求和形态约束以 constraintGroups 下发（V11 前端组校验数据）")
+    void scenarioDetailConstraintGroups() throws Exception {
+        insertScenario("CH1", "CH1-001", "供应商铁三角", "supplier-triangle", "intro", 1, true,
+                List.of(), weightParams(), List.of(),
+                List.of(Map.of("name", "weight_sum", "expression",
+                        "weight_tech + weight_quality + weight_response + weight_delivery + weight_cost + weight_environment == 1",
+                        "message", "评估维度权重和必须等于 1")));
+        mockMvc.perform(get("/api/scenarios/CH1-001"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.constraintGroups.length()").value(1))
+                .andExpect(jsonPath("$.data.constraintGroups[0].name").value("weight_sum"))
+                .andExpect(jsonPath("$.data.constraintGroups[0].op").value("=="))
+                .andExpect(jsonPath("$.data.constraintGroups[0].target").value(1.0))
+                .andExpect(jsonPath("$.data.constraintGroups[0].params.length()").value(6))
+                .andExpect(jsonPath("$.data.constraintGroups[0].params[0]").value("weight_tech"));
     }
 
     @Test
@@ -161,6 +183,16 @@ class ScenarioCatalogControllerTest {
         scenario.setOutputs(objectMapper.writeValueAsString(outputs));
         scenario.setConstraints(objectMapper.writeValueAsString(constraints));
         scenarioMapper.insert(scenario);
+    }
+
+    private static List<Map<String, Object>> weightParams() {
+        return List.of(
+                Map.of("key", "weight_tech", "label", "技术维度权重", "type", "float", "min", 0, "max", 1, "default", 0.2),
+                Map.of("key", "weight_quality", "label", "质量维度权重", "type", "float", "min", 0, "max", 1, "default", 0.2),
+                Map.of("key", "weight_response", "label", "响应维度权重", "type", "float", "min", 0, "max", 1, "default", 0.15),
+                Map.of("key", "weight_delivery", "label", "交付维度权重", "type", "float", "min", 0, "max", 1, "default", 0.15),
+                Map.of("key", "weight_cost", "label", "成本维度权重", "type", "float", "min", 0, "max", 1, "default", 0.2),
+                Map.of("key", "weight_environment", "label", "环境维度权重", "type", "float", "min", 0, "max", 1, "default", 0.1));
     }
 
     private static List<Map<String, Object>> params7r() {

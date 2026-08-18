@@ -62,12 +62,14 @@ class AllScenariosSmokeTest {
         List<String> failures = new ArrayList<>();
         List<String> reports = new ArrayList<>();
         int runCount = 0;
+        Map<String, Integer> chapterCounts = new LinkedHashMap<>();
         for (Resource resource : resources) {
             String file = resource.getFilename();
             Map<String, Object> def = objectMapper.readValue(resource.getInputStream(),
                     new TypeReference<LinkedHashMap<String, Object>>() {
                     });
             String moduleId = str(def, "moduleId");
+            chapterCounts.merge(str(asMap(def.get("chapter")), "code"), 1, Integer::sum);
             try {
                 schemaValidate(def, file, failures);
                 Map<String, Object> defaults = defaultParams(def, file, failures);
@@ -82,7 +84,17 @@ class AllScenariosSmokeTest {
                 if (!vErrors.isEmpty()) {
                     failures.add(file + " " + moduleId + ": 默认参数 validate 失败 → " + vErrors);
                 }
+                long started = System.nanoTime();
                 SimResult result = engine.run(new LinkedHashMap<>(defaults), 42L, null);
+                long elapsedMs = (System.nanoTime() - started) / 1_000_000;
+                if (str(def, "difficulty").equals("comprehensive")) {
+                    if (elapsedMs > 5_000) {
+                        failures.add(file + " " + moduleId + ": 综合场景运行耗时 " + elapsedMs + "ms 超过 5s（SC-008）");
+                    }
+                    if (result.steps().size() > 5_000) {
+                        failures.add(file + " " + moduleId + ": 综合场景步骤数 " + result.steps().size() + " 超过 5000（V10）");
+                    }
+                }
                 if (result.steps().isEmpty()) {
                     failures.add(file + " " + moduleId + ": run 未产生任何步骤");
                 }
@@ -93,6 +105,11 @@ class AllScenariosSmokeTest {
                 failures.add(file + " " + moduleId + ": 冒烟异常 → " + e);
             }
         }
+        assertEquals(Map.ofEntries(
+                Map.entry("CH1", 8), Map.entry("CH2", 10), Map.entry("CH3", 8), Map.entry("CH4", 7),
+                Map.entry("CH5", 8), Map.entry("CH6", 6), Map.entry("CH7", 8), Map.entry("CH8", 8),
+                Map.entry("CH9", 6), Map.entry("CH10", 5), Map.entry("CH11", 10)), chapterCounts,
+                "各章场景数与 V2 文档附录 C 一致（SC-001）");
         assertEquals(EXPECTED_SCENARIOS, runCount,
                 "全部场景应完成冒烟，失败项:\n" + String.join("\n", failures));
         if (!reports.isEmpty()) {

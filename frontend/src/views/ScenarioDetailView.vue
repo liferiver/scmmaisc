@@ -58,12 +58,15 @@ const missingDefaultParams = computed(() =>
   (detail.value?.params ?? []).filter((p) => p.default === undefined && p.type !== 'bool'),
 )
 
+/**
+ * 难度标签文案（FR-016）：intro/basic/advanced/comprehensive 四级。
+ */
 function difficultyText(d: string) {
-  return d === 'intro' ? '入门' : d === 'basic' ? '基础' : '进阶'
+  return d === 'intro' ? '入门' : d === 'basic' ? '基础' : d === 'comprehensive' ? '综合' : '进阶'
 }
 
 function difficultyType(d: string) {
-  return d === 'intro' ? 'success' : d === 'basic' ? 'warning' : 'danger'
+  return d === 'intro' ? 'success' : d === 'basic' ? 'warning' : d === 'comprehensive' ? 'primary' : 'danger'
 }
 
 function paramTypeText(t: string) {
@@ -89,6 +92,8 @@ function outputTypeText(t: string) {
     topo: '拓扑关系',
     heatmap: '热力图',
     gauge: '仪表盘',
+    matrix: '矩阵',
+    timeseries: '时间序列',
   }
   return map[t] ?? t
 }

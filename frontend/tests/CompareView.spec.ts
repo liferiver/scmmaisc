@@ -154,4 +154,31 @@ describe('CompareView（T038）', () => {
     // 删除后只剩 1 组 → 提示需至少 2 组
     expect(wrapper.find('[data-test="compare-need-two"]').exists()).toBe(true)
   })
+
+  it('结构化输出（gauge/dist/heatmap）在对比表中显示紧凑摘要，不出现 [object Object]', async () => {
+    const a = set('a1', '方案A', 1000)
+    a.result.outputs.push(
+      output({ key: 'score', label: '综合得分', type: 'gauge', value: [{ name: '综合得分', value: 82 }], unit: '%' }),
+      output({ key: 'mode', label: '配送方式分布', type: 'dist', value: [{ name: '上门', value: 0.4 }, { name: '自提', value: 0.6 }] }),
+      output({
+        key: 'hm',
+        label: '风险热力',
+        type: 'heatmap',
+        value: { rows: ['R1', 'R2'], columns: ['C1', 'C2', 'C3'], data: [[1, 2, 3], [4, 5, 6]] },
+      }),
+    )
+    const b = set('b2', '方案B', 800)
+    b.result.outputs.push(...a.result.outputs.map((o) => ({ ...o })))
+    seedStorage([a, b])
+    const wrapper = mountView()
+    await flushPromises()
+
+    // 原有 3 个（scalar/series/topo）+ 新增 3 个（gauge/dist/heatmap）
+    expect(wrapper.findAll('[data-test="compare-compare-table"] .el-table__row')).toHaveLength(6)
+    const text = wrapper.find('[data-test="compare-compare-table"]').text()
+    expect(text).toContain('综合得分=82')
+    expect(text).toContain('上门=0.4，自提=0.6')
+    expect(text).toContain('热力图（2×3）')
+    expect(text).not.toContain('[object Object]')
+  })
 })

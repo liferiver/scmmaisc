@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue'
 import { ElMessageBox } from 'element-plus'
-import type { Parameter } from '@/types'
+import type { Parameter, ParamGroupConstraint } from '@/types'
 
 /**
  * 参数面板（T031，FR-004）：按 type 渲染控件（int/float→el-input-number、enum/func→el-select、
  * bool→el-switch、dist→子参数组、matrix/timeseries→表格）；即时校验（越界/非数字红字提示），
  * 存在错误时不可提交；重置需确认（存在未保存修改时）。
+ * 二期（V11）：语义化标量组（weight_* 等）组头展示实时合计，并按后端下发的组约束
+ * （constraintGroups，如权重和=1）即时校验，违反时红字提示且不可提交。
  */
 const props = defineProps<{
   params: Parameter[]
   modelValue: Record<string, unknown>
   submitting?: boolean
+  groups?: ParamGroupConstraint[]
 }>()
 
 const emit = defineEmits<{
@@ -104,7 +107,91 @@ const errors = computed<Record<string, string>>(() => {
   return map
 })
 
-const valid = computed(() => Object.keys(errors.value).length === 0)
+/** 参数 key → 所属语义组（V11）。 */
+const groupByParam = computed<Record<string, ParamGroupConstraint>>(() => {
+  const map: Record<string, ParamGroupConstraint> = {}
+  for (const g of props.groups ?? []) {
+    for (const k of g.params) map[k] = g
+  }
+  return map
+})
+
+/** 各组首参数 key（用于渲染组头）。 */
+const groupStarts = computed<Set<string>>(() => {
+  const starts = new Set<string>()
+  for (const g of props.groups ?? []) {
+    if (g.params.length > 0) starts.add(g.params[0])
+  }
+  return starts
+})
+
+/** 组内当前值合计；任一参数缺失/非法时返回 null（单项必填错误已另行提示）。 */
+function groupSum(g: ParamGroupConstraint): number | null {
+  let sum = 0
+  for (const k of g.params) {
+    const v = form[k]
+    if (v === null || v === undefined || v === '') return null
+    const n = Number(v)
+    if (!Number.isFinite(n)) return null
+    sum += n
+  }
+  return sum
+}
+
+/** 组约束右端值：常量或目标参数当前值；不可求时返回 null。 */
+function groupTarget(g: ParamGroupConstraint): number | null {
+  if (g.targetParam) {
+    const v = form[g.targetParam]
+    const n = v === null || v === undefined || v === '' ? Number.NaN : Number(v)
+    return Number.isFinite(n) ? n : null
+  }
+  return g.target
+}
+
+function groupOk(g: ParamGroupConstraint, sum: number, target: number): boolean {
+  switch (g.op) {
+    case '<':
+      return sum < target
+    case '<=':
+      return sum <= target
+    case '>':
+      return sum > target
+    case '>=':
+      return sum >= target
+    case '!=':
+      return Math.abs(sum - target) >= 1e-6
+    default:
+      return Math.abs(sum - target) <= 1e-6
+  }
+}
+
+/** 组约束校验错误（key = 约束 name，V11）。 */
+const groupErrors = computed<Record<string, string>>(() => {
+  const map: Record<string, string> = {}
+  for (const g of props.groups ?? []) {
+    const sum = groupSum(g)
+    if (sum === null) continue
+    const target = groupTarget(g)
+    if (target === null) continue
+    if (!groupOk(g, sum, target)) {
+      map[g.name] = `${g.message}（当前合计 ${round2(sum)}）`
+    }
+  }
+  return map
+})
+
+function round2(n: number): string {
+  return Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100)
+}
+
+function groupSumText(g: ParamGroupConstraint): string {
+  const sum = groupSum(g)
+  return sum === null ? '-' : round2(sum)
+}
+
+const valid = computed(
+  () => Object.keys(errors.value).length === 0 && Object.keys(groupErrors.value).length === 0,
+)
 
 function hasChanges(): boolean {
   for (const p of props.params) {
@@ -155,6 +242,18 @@ function submit() {
   <div class="param-panel">
     <el-form label-position="top" size="default">
       <el-form-item v-for="p in params" :key="p.key" :label="p.label">
+        <!-- 语义化标量组头（V11）：组名 + 实时合计 + 组约束错误 -->
+        <div v-if="groupStarts.has(p.key)" class="param-group-label" :data-test="`param-group-${groupByParam[p.key].name}`">
+          {{ groupByParam[p.key].message }}
+          <span class="param-group-sum">当前合计：{{ groupSumText(groupByParam[p.key]) }}</span>
+          <span
+            v-if="groupErrors[groupByParam[p.key].name]"
+            class="param-group-error"
+            :data-test="`param-group-error-${groupByParam[p.key].name}`"
+          >
+            {{ groupErrors[groupByParam[p.key].name] }}
+          </span>
+        </div>
         <!-- int / float：数字输入（保留原始字符串即时校验，FR-004） -->
         <div v-if="p.type === 'int' || p.type === 'float'" class="param-control" :data-test="`param-${p.key}`">
           <el-input v-model="(form[p.key] as string)" placeholder="请输入数值" />
@@ -255,6 +354,19 @@ function submit() {
 .dist-label {
   color: #606266;
   font-size: 13px;
+}
+.param-group-label {
+  font-size: 12px;
+  color: #409eff;
+  margin-bottom: 4px;
+}
+.param-group-sum {
+  color: #909399;
+  margin-left: 8px;
+}
+.param-group-error {
+  color: #f56c6c;
+  margin-left: 8px;
 }
 .param-actions {
   margin-top: 8px;

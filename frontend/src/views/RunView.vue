@@ -144,6 +144,7 @@ onMounted(load)
               v-if="detail.params.length > 0"
               v-model="params"
               :params="detail.params"
+              :groups="detail.constraintGroups ?? []"
               :submitting="runStore.running"
               data-test="param-panel"
               @submit="onSubmit"

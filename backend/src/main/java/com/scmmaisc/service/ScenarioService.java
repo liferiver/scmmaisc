@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 场景服务（C2/C3）：JSON 列解析为结构化对象返回；moduleId 不存在抛 404。
@@ -50,11 +52,16 @@ public class ScenarioService {
     }
 
     private ScenarioDetailVO toDetail(Scenario s) {
+        List<Map<String, Object>> params = parseJsonList(s.getParams());
+        List<Map<String, Object>> constraints = parseJsonList(s.getConstraints());
+        Set<String> paramKeys = params.stream()
+                .map(p -> String.valueOf(p.get("key")))
+                .collect(Collectors.toSet());
         return new ScenarioDetailVO(s.getId(), s.getModuleId(), s.getName(), s.getDifficulty(),
                 s.getClassHours(), Boolean.TRUE.equals(s.getIsRolePlay()), parseStringList(s.getDeps()),
                 s.getChapterId(), s.getEngineKey(), s.getConcept(), s.getDescription(),
-                parseJsonList(s.getParams()), parseJsonList(s.getOutputs()),
-                parseJsonList(s.getConstraints()));
+                params, parseJsonList(s.getOutputs()),
+                constraints, GroupConstraintExtractor.extract(constraints, paramKeys));
     }
 
     @SuppressWarnings("unchecked")
@@ -87,12 +94,13 @@ public class ScenarioService {
                                     Integer classHours, Boolean isRolePlay, List<String> deps) {
     }
 
-    /** C3 响应体：完整场景定义。 */
+    /** C3 响应体：完整场景定义（constraintGroups 为前端可即时校验的求和组约束，V11）。 */
     public record ScenarioDetailVO(Long id, String moduleId, String name, String difficulty,
                                    Integer classHours, Boolean isRolePlay, List<String> deps,
                                    Long chapterId, String engineKey, String concept, String description,
                                    List<Map<String, Object>> params,
                                    List<Map<String, Object>> outputs,
-                                   List<Map<String, Object>> constraints) {
+                                   List<Map<String, Object>> constraints,
+                                   List<GroupConstraintExtractor.GroupConstraint> constraintGroups) {
     }
 }

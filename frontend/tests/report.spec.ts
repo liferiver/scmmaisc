@@ -98,6 +98,31 @@ describe('buildReportCsv 单次运行报告（R-09）', () => {
     expect(csv).toContain('n1,N1,port')
     expect(csv).toContain('边,source,target')
   })
+
+  it('gauge / dist 数据块按具名数值列表导出（名称,值，与 compare 同构）', () => {
+    const csv = buildReportCsv(
+      result({
+        outputs: [
+          output({ key: 'g', label: '综合得分', type: 'gauge', value: [{ name: '综合得分', value: 82 }], unit: '%' }),
+          output({
+            key: 'd',
+            label: '配送方式分布',
+            type: 'dist',
+            value: [
+              { name: '上门', value: 0.4 },
+              { name: '自提', value: 0.6 },
+            ],
+          }),
+        ],
+      }),
+      '场景',
+    )
+    expect(csv).toContain('[综合得分（%）]')
+    expect(csv).toContain('综合得分,82')
+    expect(csv).toContain('[配送方式分布]')
+    expect(csv).toContain('上门,0.4')
+    expect(csv).toContain('自提,0.6')
+  })
 })
 
 describe('compareRows / buildCompareCsv 多方案对比（FR-011）', () => {
@@ -119,6 +144,8 @@ describe('compareRows / buildCompareCsv 多方案对比（FR-011）', () => {
           output({ key: 'curve', label: '成本曲线', type: 'series', value: { x: [1, 2, 3], series: [] } }),
           output({ key: 't', label: '拓扑', type: 'topo', value: { nodes: [{ id: 'n1' }], edges: [{ source: 'n1', target: 'n2' }] } }),
           output({ key: 'c', label: '对比', type: 'compare', value: [{ name: 'A', value: 1 }, { name: 'B', value: 2 }] }),
+          output({ key: 'h', label: '热力', type: 'heatmap', value: { rows: ['R1', 'R2'], columns: ['C1', 'C2', 'C3'], data: [] } }),
+          output({ key: 'g', label: '综合得分', type: 'gauge', value: [{ name: '得分', value: 82 }] }),
         ],
       }),
     })
@@ -128,6 +155,8 @@ describe('compareRows / buildCompareCsv 多方案对比（FR-011）', () => {
     expect(byKey.curve.values[0]).toBe('曲线（3 点）')
     expect(byKey.t.values[0]).toBe('拓扑（1 节点 / 1 边）')
     expect(byKey.c.values[0]).toBe('A=1，B=2')
+    expect(byKey.h.values[0]).toBe('热力图（2×3）')
+    expect(byKey.g.values[0]).toBe('得分=82')
     expect(byKey.curve.values[1]).toBeNull()
   })
 

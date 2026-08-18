@@ -27,12 +27,12 @@ export interface Parameter {
   description?: string
 }
 
-/** 输出指标定义（data-model.md outputs 元素）。 */
+/** 输出指标定义（data-model.md outputs 元素；matrix/timeseries 为二期新增类型，T065）。 */
 export interface OutputIndicator {
   key: string
   label: string
-  type: 'scalar' | 'series' | 'compare' | 'dist' | 'topo' | 'heatmap' | 'gauge'
-  unit?: string
+  type: 'scalar' | 'series' | 'compare' | 'dist' | 'topo' | 'heatmap' | 'gauge' | 'matrix' | 'timeseries'
+  unit?: string | null
 }
 
 /** 约束表达式（FR-005，expression 仅展示与提示，R-11）。 */
@@ -42,13 +42,28 @@ export interface Constraint {
   message: string
 }
 
+/**
+ * 语义化标量组约束（C3 二期，V11）：纯求和比较形态 p1+…+pn <op> 常量|参数，
+ * 由后端从 constraint.expression 提取（如 weight_* 权重和 = 1），供前端按组即时校验。
+ */
+export interface ParamGroupConstraint {
+  name: string
+  message: string
+  params: string[]
+  op: '<' | '<=' | '==' | '>=' | '>' | '!='
+  /** 右端数值常量（targetParam 为空时有效）。 */
+  target: number | null
+  /** 右端为参数 key（如预算上限）时有效。 */
+  targetParam: string | null
+}
+
 /** 场景概要（C2）。 */
 export interface ScenarioSummary {
   id: number
   chapterId: number
   moduleId: string
   name: string
-  difficulty: 'intro' | 'basic' | 'advanced'
+  difficulty: 'intro' | 'basic' | 'advanced' | 'comprehensive'
   classHours?: number
   isRolePlay: boolean
   deps: string[]
@@ -63,6 +78,7 @@ export interface ScenarioDetail extends ScenarioSummary {
   params: Parameter[]
   outputs: OutputIndicator[]
   constraints: Constraint[]
+  constraintGroups?: ParamGroupConstraint[]
 }
 
 /** 创建运行请求（C4）。 */

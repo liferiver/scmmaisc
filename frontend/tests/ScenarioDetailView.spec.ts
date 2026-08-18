@@ -127,6 +127,24 @@ describe('ScenarioDetailView', () => {
     expect(wrapper.find('[data-test="missing-defaults-alert"]').exists()).toBe(false)
   })
 
+  it('综合难度展示「综合」标签，输出类型含 matrix/timeseries 文案（FR-016）', async () => {
+    const detail = eoqDetail()
+    detail.difficulty = 'comprehensive'
+    detail.outputs = [
+      { key: 'risk_points', label: '风险点热力图', type: 'heatmap', unit: null },
+      { key: 'routes', label: '路径矩阵', type: 'matrix', unit: null },
+      { key: 'demand_series', label: '需求时序', type: 'timeseries', unit: '件' },
+    ]
+    mockOk(detail)
+    const wrapper = mount(ScenarioDetailView, { props: { moduleId: 'CH2-003' } })
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('综合')
+    expect(wrapper.text()).toContain('热力图')
+    expect(wrapper.text()).toContain('矩阵')
+    expect(wrapper.text()).toContain('时间序列')
+  })
+
   it('详情请求失败显示错误态并可重试', async () => {
     // 目录请求先行消费，不能用 mockImplementationOnce；用状态位让详情首次失败、重试成功
     let detailFailed = false
