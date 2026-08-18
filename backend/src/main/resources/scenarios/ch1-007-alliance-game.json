@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH1", "name": "第一章 概论", "sortNo": 1 },
+  "moduleId": "CH1-007",
+  "name": "物流联盟合作博弈仿真",
+  "engineKey": "alliance-game",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "物流联盟、合作博弈、成本分摊、Shapley值、联盟稳定性、个体理性与集体理性",
+  "description": "多家企业各自物流需求 → 独立运营成本测算 → 联盟组建(共享运力/仓储/配送网络) → 联盟总成本节省计算 → 利益分配方案(均分/按量/Shapley值/按贡献) → 联盟成员满意度 → 联盟稳定性评估；Shapley 值按边际贡献分配，满足个体理性与集体理性",
+  "deps": ["CH1-004"],
+  "params": [
+    { "key": "member_count", "label": "联盟企业数", "type": "int", "unit": "家", "min": 3, "max": 6, "step": 1, "default": 4, "description": "如广泽乳业 Z 联盟案例" },
+    { "key": "members", "label": "成员物流量与独立成本", "type": "matrix", "description": "每行一个成员：年物流量(万吨)、独立运营总成本(万元)（V2 文档 float[] 转写为矩阵）" },
+    { "key": "resource_pool", "label": "联盟共享资源池", "type": "float", "unit": "万元", "min": 0, "max": 1000000, "step": 100, "default": 100000, "description": "共享仓库/车队运力投入" },
+    { "key": "synergy_factor", "label": "协同效应系数", "type": "float", "min": 0.8, "max": 1.0, "step": 0.01, "default": 0.85, "description": "<1 表示协同节省，=1 无节省" },
+    { "key": "allocation_method", "label": "分配方案", "type": "enum", "default": "shapley", "options": [ { "label": "均分", "value": "equal" }, { "label": "按量比例", "value": "by_volume" }, { "label": "Shapley值", "value": "shapley" }, { "label": "按贡献", "value": "by_contribution" } ], "description": "四种利益分配方法" }
+  ],
+  "outputs": [
+    { "key": "total_saving", "label": "联盟总成本节省", "type": "scalar", "unit": "万元" },
+    { "key": "member_gain", "label": "各成员实际分得利益", "type": "compare", "unit": "万元" },
+    { "key": "fairness_index", "label": "分配公平性指数", "type": "scalar" },
+    { "key": "stability", "label": "联盟稳定性", "type": "gauge", "unit": "%" },
+    { "key": "shapley_values", "label": "Shapley值计算结果", "type": "compare", "unit": "万元" }
+  ],
+  "constraints": [
+    { "name": "individual_rationality", "expression": "member_gain_i >= 0", "message": "每个成员收益大于独立运营收益（个体理性）" },
+    { "name": "collective_rationality", "expression": "total_saving > 0", "message": "联盟总收益大于各独立之和（集体理性）" }
+  ]
+}

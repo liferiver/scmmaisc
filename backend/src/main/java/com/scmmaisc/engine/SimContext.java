@@ -15,6 +15,7 @@ public class SimContext {
     public static final int MAX_STEPS = 5000;
 
     private final Map<String, Object> params;
+    private final long seed;
     private final RandomSource random;
     private final List<StepEvent> steps = new ArrayList<>();
     private final List<OutputValue> outputs = new ArrayList<>();
@@ -23,6 +24,7 @@ public class SimContext {
 
     public SimContext(Map<String, Object> params, long seed) {
         this.params = Objects.requireNonNull(params, "params");
+        this.seed = seed;
         this.random = new RandomSource(seed);
     }
 
@@ -34,6 +36,11 @@ public class SimContext {
     /** 可复现随机源（R-05：java.util.Random(seed)，执行器唯一随机入口）。 */
     public RandomSource random() {
         return random;
+    }
+
+    /** 运行种子（综合场景子模型派生用，R-13：StepAggregator.childSeed）。 */
+    public long seed() {
+        return seed;
     }
 
     /** 注册步骤监听器（RunService 用于逐条落库 simulation_log）。 */

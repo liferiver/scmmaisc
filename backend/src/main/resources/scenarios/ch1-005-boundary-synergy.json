@@ -1,0 +1,24 @@
+{
+  "chapter": { "code": "CH1", "name": "第一章 概论", "sortNo": 1 },
+  "moduleId": "CH1-005",
+  "name": "物流管理与供应链管理边界与协同仿真",
+  "engineKey": "boundary-synergy",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "物流管理vs供应链管理边界、功能重叠与协同、物流是SCM子集但独立学科",
+  "description": "企业场景设定(制造/零售/电商) → 物流管理子系统(运输/仓储/配送/包装) → 供应链管理跨企业协调(采购/计划/协同/金融) → 功能边界可视化 → 协同效率评估；协同机制成熟度越高，边界模糊导致的成本越低",
+  "deps": [],
+  "params": [
+    { "key": "enterprise_type", "label": "企业类型", "type": "enum", "default": "manufacturing", "options": [ { "label": "制造", "value": "manufacturing" }, { "label": "零售", "value": "retail" }, { "label": "电商", "value": "ecommerce" } ], "description": "影响物流与SCM边界" },
+    { "key": "scm_levels", "label": "供应链层级", "type": "int", "unit": "级", "min": 2, "max": 5, "step": 1, "default": 3, "description": "上下游层级数" },
+    { "key": "logistics_coverage", "label": "物流功能覆盖面", "type": "float", "min": 0.3, "max": 1.0, "step": 0.05, "default": 0.7, "description": "物流在企业内的职责范围" },
+    { "key": "synergy_maturity", "label": "协同机制成熟度", "type": "int", "min": 1, "max": 5, "step": 1, "default": 3, "description": "1=无协同，5=深度协同" }
+  ],
+  "outputs": [
+    { "key": "overlap_heatmap", "label": "物流-SCM功能重叠度矩阵", "type": "heatmap" },
+    { "key": "synergy_efficiency", "label": "协同效率", "type": "scalar", "unit": "%" },
+    { "key": "boundary_cost", "label": "边界模糊导致的成本", "type": "scalar", "unit": "万元" }
+  ],
+  "constraints": []
+}

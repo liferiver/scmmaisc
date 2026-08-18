@@ -1,0 +1,33 @@
+{
+  "chapter": { "code": "CH7", "name": "第七章 供应链设计与构建", "sortNo": 7 },
+  "moduleId": "CH7-004",
+  "name": "供应链柔性设计仿真",
+  "engineKey": "flexibility",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": false,
+  "concept": "柔性类型(产能/产品/数量/时间柔性)、柔性投资、实物期权价值",
+  "description": "企业在不确定市场中选择柔性投资水平: 专用设备(低固定成本/无柔性) vs 柔性设备(高固定成本/可多产品切换) vs 混合(部分柔性+外包互补) → 多种需求情景下计算期望利润 → 评估柔性投资价值；对比无柔性与有柔性在高不确定市场的表现，量化柔性价值类似金融期权价值",
+  "deps": ["CH2-006"],
+  "params": [
+    { "key": "scenario_count", "label": "需求情景数", "type": "int", "unit": "个", "min": 3, "max": 10, "step": 1, "default": 5, "description": "不同需求实现" },
+    { "key": "scenario_probs", "label": "各情景概率矩阵", "type": "matrix", "description": "1×N 每情景发生概率，和=1（V2 文档 float[] 转写）" },
+    { "key": "dedicated_fixed_cost", "label": "专用设备固定成本", "type": "float", "unit": "万元", "min": 100, "max": 1000, "step": 50, "default": 300, "description": "低固定" },
+    { "key": "dedicated_var_cost", "label": "专用设备可变成本", "type": "float", "unit": "元/件", "min": 50, "max": 200, "step": 5, "default": 100, "description": "低成本" },
+    { "key": "flexible_fixed_cost", "label": "柔性设备固定成本", "type": "float", "unit": "万元", "min": 150, "max": 1500, "step": 50, "default": 600, "description": "高固定" },
+    { "key": "flexible_var_cost", "label": "柔性设备可变成本", "type": "float", "unit": "元/件", "min": 60, "max": 250, "step": 5, "default": 120, "description": "略高可变" },
+    { "key": "product_types", "label": "产品种类", "type": "int", "unit": "种", "min": 2, "max": 5, "step": 1, "default": 3, "description": "柔性可切换的产品数" },
+    { "key": "shortage_loss_ratio", "label": "缺货损失系数", "type": "float", "min": 0.3, "max": 1.0, "step": 0.05, "default": 0.5, "description": "售价×系数，含机会成本" },
+    { "key": "surplus_discount", "label": "过剩折价率", "type": "float", "min": 0.5, "max": 0.8, "step": 0.05, "default": 0.6, "description": "过剩处理回收率" }
+  ],
+  "outputs": [
+    { "key": "profit_dist", "label": "各情景利润分布", "type": "dist", "unit": "元" },
+    { "key": "expected_profit", "label": "期望利润", "type": "scalar", "unit": "元" },
+    { "key": "flexibility_roi", "label": "柔性投资ROI", "type": "scalar", "unit": "%" },
+    { "key": "worst_case_loss", "label": "最差情景损失", "type": "scalar", "unit": "元" },
+    { "key": "flexibility_utilization", "label": "柔性利用率", "type": "series", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "prob_sum_ok", "expression": "scenario_count >= 3", "message": "各情景概率之和需等于 1；产能需 ≥ 最低承诺量" }
+  ]
+}

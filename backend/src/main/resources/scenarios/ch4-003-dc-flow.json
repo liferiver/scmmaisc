@@ -1,0 +1,33 @@
+{
+  "chapter": { "code": "CH4", "name": "第四章 电子商务环境下的物流系统", "sortNo": 4 },
+  "moduleId": "CH4-003",
+  "name": "配送中心集货-分拣-配货-配送全流程仿真",
+  "engineKey": "dc-flow",
+  "difficulty": "basic",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "配送中心(DC)作业流程、播种式vs摘果式拣选、波次策略、集货合流",
+  "description": "供应商送货→验收→入库上架→订单波次释放→任务分配 → 摘果式按订单逐SKU拣取 / 播种式先集中拣选再按订单分播 → 复核包装→按线路集货→装车发运；对比多品少量订单(播种式)与单品多量订单(摘果式)的效率差异",
+  "deps": ["CH3-004"],
+  "params": [
+    { "key": "daily_orders", "label": "日处理订单数", "type": "int", "unit": "单", "min": 500, "max": 50000, "step": 500, "default": 10000, "description": "配送中心吞吐" },
+    { "key": "avg_lines", "label": "平均订单行数", "type": "float", "unit": "行", "min": 1.5, "max": 15, "step": 0.5, "default": 5, "description": "每订单 SKU 种类数" },
+    { "key": "picking_mode", "label": "拣选模式", "type": "enum", "default": "mixed", "options": [ { "label": "摘果式", "value": "order_pick" }, { "label": "播种式", "value": "batch_pick" }, { "label": "混合", "value": "mixed" } ], "description": "核心决策" },
+    { "key": "wave_interval", "label": "波次间隔", "type": "int", "unit": "分钟", "min": 15, "max": 120, "step": 5, "default": 30, "description": "波次释放频率" },
+    { "key": "conveyor_speed", "label": "分拣传送带速度", "type": "float", "unit": "m/s", "min": 0.5, "max": 3.0, "step": 0.1, "default": 1.5, "description": "自动分拣线速率" },
+    { "key": "pickers", "label": "拣选人员", "type": "int", "unit": "人", "min": 5, "max": 100, "step": 5, "default": 30, "description": "拣选岗位人数（V2 文档 int[3] 转写）" },
+    { "key": "counters", "label": "复核人员", "type": "int", "unit": "人", "min": 5, "max": 100, "step": 5, "default": 15, "description": "复核岗位人数（V2 文档 int[3] 转写）" },
+    { "key": "packers", "label": "包装人员", "type": "int", "unit": "人", "min": 5, "max": 100, "step": 5, "default": 20, "description": "包装岗位人数（V2 文档 int[3] 转写）" },
+    { "key": "grid_count", "label": "播种墙格口数", "type": "int", "unit": "个", "min": 20, "max": 200, "step": 10, "default": 100, "description": "播种式分播格口" }
+  ],
+  "outputs": [
+    { "key": "order_cycle", "label": "订单处理周期(下单→出库)", "type": "series", "unit": "小时" },
+    { "key": "pick_efficiency", "label": "人均拣选效率", "type": "scalar", "unit": "行/人时" },
+    { "key": "station_utilization", "label": "各环节工时利用率", "type": "compare", "unit": "%" },
+    { "key": "best_mode", "label": "最优拣选模式选择", "type": "scalar" },
+    { "key": "bottleneck", "label": "瓶颈环节识别", "type": "topo" }
+  ],
+  "constraints": [
+    { "name": "same_day_ok", "expression": "wave_interval <= 60", "message": "波次间隔需 ≤ 60 分钟以保证当日订单当日发出（截单时间前）" }
+  ]
+}

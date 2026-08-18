@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH11", "name": "第十一章 现代物流与供应链发展", "sortNo": 11 },
+  "moduleId": "CH11-003",
+  "name": "大数据驱动的供应链动态决策仿真",
+  "engineKey": "big-data",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "大数据、实时数据流、需求感知、动态定价、智能补货",
+  "description": "多源数据实时接入：POS实时销售(需求感知偏离预测即触发)、社交媒体情绪(需求热度预警)、天气预报(影响补货配送决策)、交通数据(动态路径调整)→数据驱动决策vs传统经验决策并行对比→实时KPI监控和决策调整；讨论大数据也有噪音——社交媒体误报导致错误补货的案例强调信号验证",
+  "deps": ["CH11-001", "CH11-002"],
+  "params": [
+    { "key": "data_source_count", "label": "数据源数量", "type": "int", "unit": "个", "min": 3, "max": 6, "step": 1, "default": 4, "description": "多源数据接入" },
+    { "key": "pos_refresh_minutes", "label": "POS数据刷新频率", "type": "float", "unit": "分钟", "min": 15, "max": 60, "step": 5, "default": 30, "description": "实时性" },
+    { "key": "social_signal_ratio", "label": "社交媒体信号信噪比", "type": "float", "min": 0.1, "max": 0.5, "step": 0.05, "default": 0.3, "description": "情绪信号可靠性" },
+    { "key": "legacy_delay", "label": "决策响应延迟(传统)", "type": "float", "unit": "天", "min": 1, "max": 7, "step": 0.5, "default": 3, "description": "传统周报决策" },
+    { "key": "bigdata_delay", "label": "决策响应延迟(大数据)", "type": "float", "unit": "分钟", "min": 15, "max": 60, "step": 5, "default": 30, "description": "实时决策" },
+    { "key": "false_positive_rate", "label": "误报率(虚假信号)", "type": "float", "min": 0.05, "max": 0.25, "step": 0.05, "default": 0.1, "description": "数据质量问题" }
+  ],
+  "outputs": [
+    { "key": "profit_compare", "label": "大数据vs传统决策利润对比", "type": "compare", "unit": "元" },
+    { "key": "response_speedup", "label": "响应速度提升", "type": "scalar", "unit": "%" },
+    { "key": "false_alarm_loss", "label": "误报导致损失", "type": "scalar", "unit": "元" },
+    { "key": "turnover_improvement", "label": "库存周转改善", "type": "scalar", "unit": "%" },
+    { "key": "stockout_compare", "label": "缺货率对比", "type": "compare", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "latency_ok", "expression": "pos_refresh_minutes <= 60", "message": "数据延迟需不超过决策周期（实时决策要求分钟级数据）" }
+  ]
+}

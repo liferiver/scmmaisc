@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH2", "name": "第二章 物流系统控制", "sortNo": 2 },
+  "moduleId": "CH2-009",
+  "name": "智慧物流多系统协同仿真(RCS/iWMS/FIS/PLP)",
+  "engineKey": "multi-system",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": false,
+  "concept": "机器人控制系统(RCS)、智能仓储管理系统(iWMS)、柔性拣选系统(FIS)、包裹定位平台(PLP)、系统协同短板效应",
+  "description": "订单下达到iWMS → iWMS分配库位+生成拣选指令 → RCS调度AGV/AMR → FIS执行拣选(货到人/人到货) → PLP包裹全程追踪 → 四系统数据互通 → 协同效率评估；逐步增加 AGV 数量观察吞吐量提升，发现通信延迟成为新瓶颈",
+  "deps": [],
+  "params": [
+    { "key": "agv_count", "label": "AGV/AMR数量", "type": "int", "unit": "台", "min": 5, "max": 200, "step": 5, "default": 50, "description": "机器人台数" },
+    { "key": "agv_speed", "label": "AGV行驶速度", "type": "float", "unit": "m/s", "min": 0.5, "max": 2.0, "step": 0.1, "default": 1.0, "description": "影响搬运效率" },
+    { "key": "storage_strategy", "label": "iWMS库位分配策略", "type": "enum", "default": "abc", "options": [ { "label": "随机", "value": "random" }, { "label": "分类", "value": "category" }, { "label": "ABC", "value": "abc" }, { "label": "就近", "value": "nearest" } ], "description": "存储策略" },
+    { "key": "picking_mode", "label": "FIS拣选模式", "type": "enum", "default": "goods_to_man", "options": [ { "label": "人到货", "value": "man_to_goods" }, { "label": "货到人", "value": "goods_to_man" }, { "label": "混合", "value": "mixed" } ], "description": "拣选模式" },
+    { "key": "plp_precision", "label": "PLP定位精度", "type": "float", "unit": "m", "min": 0.1, "max": 1.0, "step": 0.1, "default": 0.5, "description": "包裹追踪精度" },
+    { "key": "comm_delay_ms", "label": "系统间通信延迟", "type": "float", "unit": "ms", "min": 50, "max": 500, "step": 10, "default": 100, "description": "多系统数据同步延迟" },
+    { "key": "wave_strategy", "label": "订单波次策略", "type": "enum", "default": "mixed", "options": [ { "label": "定时波次", "value": "timed" }, { "label": "连续", "value": "continuous" }, { "label": "混合", "value": "mixed" } ], "description": "订单释放策略" }
+  ],
+  "outputs": [
+    { "key": "throughput", "label": "系统总吞吐量", "type": "scalar", "unit": "单/时" },
+    { "key": "order_time", "label": "单订单处理时间", "type": "series", "unit": "分钟" },
+    { "key": "agv_utilization", "label": "AGV利用率", "type": "gauge", "unit": "%" },
+    { "key": "bottleneck", "label": "系统瓶颈识别", "type": "topo" },
+    { "key": "delay_impact", "label": "通信延迟影响", "type": "compare", "unit": "单/时" }
+  ],
+  "constraints": [
+    { "name": "comm_delay_ok", "expression": "comm_delay_ms < 1000", "message": "系统通信延迟需小于 1 秒" }
+  ]
+}

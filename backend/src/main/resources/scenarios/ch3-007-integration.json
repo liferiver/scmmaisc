@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH3", "name": "第三章 物流技术与信息系统", "sortNo": 3 },
+  "moduleId": "CH3-007",
+  "name": "物流信息系统一体化仿真(OMS+WMS+TMS)",
+  "engineKey": "integration",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "OMS订单管理系统、WMS仓储管理系统、TMS运输管理系统、系统集成、数据同步",
+  "description": "OMS: 订单接收→审核→拆分→分配到仓库 → WMS: 波次处理→库存分配→拣选→包装→出库 → TMS: 车辆调度→路径规划→在途跟踪→签收反馈；三系统数据实时同步；在大促流量洪峰场景下观察哪个系统先成为瓶颈",
+  "deps": ["CH3-004"],
+  "params": [
+    { "key": "daily_orders", "label": "日订单量", "type": "int", "unit": "单", "min": 500, "max": 50000, "step": 500, "default": 10000, "description": "OMS 吞吐" },
+    { "key": "warehouse_count", "label": "多仓布局", "type": "int", "unit": "个", "min": 1, "max": 10, "step": 1, "default": 3, "description": "WMS 分布" },
+    { "key": "split_strategy", "label": "OMS订单拆分策略", "type": "enum", "default": "by_warehouse", "options": [ { "label": "按仓库", "value": "by_warehouse" }, { "label": "按商品", "value": "by_sku" }, { "label": "按时效", "value": "by_leadtime" } ], "description": "订单分配逻辑" },
+    { "key": "wave_interval", "label": "WMS波次间隔", "type": "float", "unit": "分钟", "min": 15, "max": 120, "step": 5, "default": 30, "description": "波次策略" },
+    { "key": "vehicle_count", "label": "TMS车辆数", "type": "int", "unit": "辆", "min": 5, "max": 200, "step": 5, "default": 50, "description": "运力配置" },
+    { "key": "api_delay", "label": "系统间接口延迟", "type": "float", "unit": "秒", "min": 0.1, "max": 5, "step": 0.1, "default": 1, "description": "集成延迟" },
+    { "key": "inconsistency_rate", "label": "系统间数据不一致率", "type": "float", "min": 0.0001, "max": 0.01, "step": 0.0001, "default": 0.001, "description": "同步错误率" }
+  ],
+  "outputs": [
+    { "key": "flow_time", "label": "订单-发货全流程耗时", "type": "series", "unit": "小时" },
+    { "key": "bottlenecks", "label": "各系统处理瓶颈", "type": "topo" },
+    { "key": "delay_impact", "label": "接口延迟对总时效的影响", "type": "compare", "unit": "小时" },
+    { "key": "availability", "label": "系统可用性", "type": "gauge", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "consistency_ok", "expression": "inconsistency_rate <= 0.01", "message": "三系统数据需最终一致（数据不一致率需 ≤ 1%）" }
+  ]
+}

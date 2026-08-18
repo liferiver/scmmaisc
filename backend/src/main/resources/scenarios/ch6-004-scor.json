@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH6", "name": "第六章 供应链管理", "sortNo": 6 },
+  "moduleId": "CH6-004",
+  "name": "SCOR模型五流程仿真",
+  "engineKey": "scor",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "SCOR模型(Plan/Source/Make/Deliver/Return)、流程层级、绩效属性",
+  "description": "配置 SCOR 五流程参数: Plan(计划:需求预测→S&OP→主生产计划) / Source(采购:供应商选择→PO管理→入库质检) / Make(制造:排程→执行→质检) / Deliver(交付:订单→仓储→运输→签收) / Return(退货:审批→逆向物流→退款) → 运行供应链 → 监控五维绩效(可靠性/响应性/敏捷性/成本/资产管理)；每个学生认领一个 SCOR 流程模块协同运营",
+  "deps": [],
+  "params": [
+    { "key": "plan_cycle", "label": "Plan计划周期", "type": "int", "unit": "周", "min": 1, "max": 12, "step": 1, "default": 4, "description": "S&OP 周期" },
+    { "key": "supplier_count", "label": "Source供应商数量", "type": "int", "unit": "家", "min": 3, "max": 50, "step": 1, "default": 10, "description": "采购源" },
+    { "key": "procurement_lead_time", "label": "Source采购提前期", "type": "float", "unit": "天", "min": 1, "max": 30, "step": 1, "default": 10, "description": "采购周期" },
+    { "key": "manufacturing_cycle", "label": "Make制造周期", "type": "float", "unit": "天", "min": 1, "max": 30, "step": 1, "default": 7, "description": "生产周期" },
+    { "key": "capacity_utilization", "label": "Make产能利用率", "type": "float", "min": 0.6, "max": 0.95, "step": 0.01, "default": 0.8, "description": "制造负荷" },
+    { "key": "delivery_cycle", "label": "Deliver订单交付周期", "type": "float", "unit": "天", "min": 1, "max": 14, "step": 0.5, "default": 3, "description": "交付时效" },
+    { "key": "return_cycle", "label": "Return退货处理周期", "type": "float", "unit": "天", "min": 1, "max": 21, "step": 0.5, "default": 5, "description": "逆向流程" }
+  ],
+  "outputs": [
+    { "key": "performance_dashboard", "label": "五流程绩效仪表盘", "type": "gauge" },
+    { "key": "process_bottleneck", "label": "流程瓶颈识别", "type": "topo" },
+    { "key": "perfect_order_rate", "label": "完美订单履行率", "type": "scalar", "unit": "%" },
+    { "key": "cash_to_cash", "label": "现金-现金周期", "type": "scalar", "unit": "天" }
+  ],
+  "constraints": [
+    { "name": "utilization_ok", "expression": "capacity_utilization <= 0.95", "message": "SCOR 五绩效属性需不低于基线：产能利用率需 ≤ 95% 以保持敏捷性" }
+  ]
+}

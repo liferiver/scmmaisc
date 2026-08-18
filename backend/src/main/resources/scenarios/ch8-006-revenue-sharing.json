@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH8", "name": "第八章 供应链协同", "sortNo": 8 },
+  "moduleId": "CH8-006",
+  "name": "收益共享合同仿真",
+  "engineKey": "revenue-sharing",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "收益共享、低批发价+收入分成、协调条件",
+  "description": "供应商提供低批发价 w + 收益共享：零售商保留 φ 比例零售收入，其余(1-φ)分成给供应商；零售商基于(w,φ)选择订货量：F(q)=(φp-w)/(φp-v)；对比批发价合同 vs 收益共享合同 vs 集中决策；协调批发价 w=42.5 时订货量=集中最优；讨论 Blockbuster 音像租赁行业收益共享双赢案例",
+  "deps": ["CH8-004", "CH8-005"],
+  "params": [
+    { "key": "retail_price", "label": "零售价", "type": "float", "unit": "元", "min": 50, "max": 200, "step": 1, "default": 100, "description": "售价 p（教材典型值 100）" },
+    { "key": "wholesale_price", "label": "批发价", "type": "float", "unit": "元", "min": 20, "max": 60, "step": 1, "default": 42.5, "description": "供应商决策 w，协调条件 w=42.5（教材典型值，对应 φ=0.8/c=50）" },
+    { "key": "revenue_share", "label": "零售商收益保留比例", "type": "float", "min": 0.5, "max": 0.9, "step": 0.05, "default": 0.8, "description": "零售商保留 φ 比例零售收入（教材典型值 0.8；V2 中供应商分成比例对应 1-φ）" },
+    { "key": "salvage_value", "label": "残值", "type": "float", "unit": "元", "min": 5, "max": 20, "step": 1, "default": 20, "description": "未售出残值 v（教材典型值 20）" },
+    { "key": "demand_min", "label": "需求下限", "type": "float", "unit": "件", "min": 50, "max": 500, "step": 10, "default": 100, "description": "均匀分布需求下限" },
+    { "key": "demand_max", "label": "需求上限", "type": "float", "unit": "件", "min": 100, "max": 1000, "step": 10, "default": 500, "description": "均匀分布需求上限" }
+  ],
+  "outputs": [
+    { "key": "optimal_order_qty", "label": "供应链最优订货量", "type": "scalar", "unit": "件" },
+    { "key": "retailer_order_qty", "label": "零售商最优订货量", "type": "scalar", "unit": "件" },
+    { "key": "chain_efficiency", "label": "供应链效率", "type": "gauge", "unit": "%" },
+    { "key": "profit_compare", "label": "各方利润对比", "type": "compare", "unit": "元" },
+    { "key": "coordination_check", "label": "协调条件验证", "type": "scalar", "unit": "%" },
+    { "key": "applicability", "label": "适用条件分析", "type": "scalar" }
+  ],
+  "constraints": [
+    { "name": "w_positive", "expression": "wholesale_price > 0 and revenue_share < 1", "message": "供应商总收益=w×q+分成收入需>生产成本（收益共享下 w 可低于成本）" }
+  ]
+}

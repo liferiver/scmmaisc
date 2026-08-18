@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH2", "name": "第二章 物流系统控制", "sortNo": 2 },
+  "moduleId": "CH2-008",
+  "name": "物流KPI绩效监控预警仿真",
+  "engineKey": "kpi-monitor",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "KPI体系(成本/时间/质量/资源利用率)、预警阈值(黄/红)、绩效仪表盘、趋势分析",
+  "description": "设定KPI指标集与目标值 → 设定预警阈值(黄线/红线) → 按周期注入实际运营数据(含随机扰动) → 计算各KPI实际值 → 与阈值对比 → 超阈值触发预警 → 生成绩效报告和改善建议",
+  "deps": [],
+  "params": [
+    { "key": "target_ontime", "label": "订单准时率目标", "type": "float", "min": 0.95, "max": 0.99, "step": 0.005, "default": 0.97, "description": "黄线-2pp，红线-5pp" },
+    { "key": "target_integrity", "label": "货物完好率目标", "type": "float", "min": 0.98, "max": 0.999, "step": 0.001, "default": 0.99, "description": "黄线-1pp，红线-3pp" },
+    { "key": "target_vehicle_util", "label": "车辆利用率目标", "type": "float", "min": 0.70, "max": 0.90, "step": 0.01, "default": 0.80, "description": "黄线-10pp，红线-20pp" },
+    { "key": "target_turnover", "label": "库存周转率目标", "type": "int", "unit": "次/年", "min": 12, "max": 52, "step": 1, "default": 24, "description": "黄线-20%，红线-40%" },
+    { "key": "target_unit_cost", "label": "单均物流成本目标", "type": "float", "unit": "元/单", "min": 5, "max": 100, "step": 1, "default": 20, "description": "黄线+10%，红线+25%" },
+    { "key": "target_processing_hours", "label": "订单处理时长目标", "type": "float", "unit": "小时", "min": 1, "max": 48, "step": 1, "default": 24, "description": "黄线+20%，红线+50%" },
+    { "key": "periods", "label": "考核周期数", "type": "int", "unit": "期", "min": 12, "max": 52, "step": 1, "default": 26, "description": "周/月考核期数" }
+  ],
+  "outputs": [
+    { "key": "overall_score", "label": "综合绩效得分", "type": "scalar", "unit": "分" },
+    { "key": "kpi_gauges", "label": "各KPI达成率仪表盘", "type": "gauge", "unit": "%" },
+    { "key": "alarm_timeline", "label": "预警事件时间线", "type": "series" },
+    { "key": "trend", "label": "KPI趋势分析", "type": "series" }
+  ],
+  "constraints": [
+    { "name": "kpi_coverage", "expression": "成本/时间/质量/效率 四维度均有目标", "message": "KPI 指标必须覆盖四维度（成本/时间/质量/效率）" }
+  ]
+}

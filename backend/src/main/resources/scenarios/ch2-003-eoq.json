@@ -19,6 +19,7 @@
   "outputs": [
     { "key": "q_star", "label": "EOQ最优订货量", "type": "scalar", "unit": "件" },
     { "key": "annual_cost_curve", "label": "年总成本曲线", "type": "series", "unit": "元" },
+    { "key": "total_cost", "label": "年总成本", "type": "scalar", "unit": "元" },
     { "key": "order_count", "label": "年订货次数", "type": "scalar", "unit": "次/年" },
     { "key": "avg_inventory", "label": "平均库存水平", "type": "scalar", "unit": "件" },
     { "key": "rop", "label": "再订货点", "type": "scalar", "unit": "件" }

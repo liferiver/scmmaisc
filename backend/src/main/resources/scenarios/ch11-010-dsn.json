@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH11", "name": "第十一章 现代物流与供应链发展", "sortNo": 11 },
+  "moduleId": "CH11-010",
+  "name": "需求供给网络(DSN)理论与综合未来趋势仿真",
+  "engineKey": "dsn",
+  "difficulty": "advanced",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "需求-供给网络(DSN)、传统线性供应链→动态网络、多对多协同、生态系统竞争",
+  "description": "传统供应链：线性单向(供应商→制造商→分销商→零售商→消费者)；DSN：网络化多向(任意节点可连接、需求/供给动态匹配)；展现DSN特征：多供应商/多制造商/多渠道直接面向消费者(D2C)、需求端驱动(C2M)、平台化(菜鸟/美团)、生态系统竞争(苹果vs小米vs华为生态)；对比线性供应链vs DSN绩效与网络韧性",
+  "deps": ["CH6-005", "CH7-001"],
+  "params": [
+    { "key": "node_count", "label": "网络节点数", "type": "int", "unit": "个", "min": 20, "max": 200, "step": 10, "default": 100, "description": "供应商+制造商+渠道+消费者" },
+    { "key": "connection_density", "label": "连接密度", "type": "float", "min": 0.1, "max": 1.0, "step": 0.05, "default": 0.4, "description": "节点间连接比例" },
+    { "key": "customization", "label": "需求定制化程度", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.3, "description": "C2M程度" },
+    { "key": "platform_degree", "label": "平台化程度", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.5, "description": "平台撮合vs自营" },
+    { "key": "info_transparency", "label": "信息透明度", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.6, "description": "全网信息可见度" },
+    { "key": "ecosystem_barrier", "label": "生态间壁垒", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.4, "description": "跨生态连接困难度" },
+    { "key": "disruption_events", "label": "突发事件次数", "type": "int", "unit": "次", "min": 0, "max": 10, "step": 1, "default": 3, "description": "节点中断→网络自愈（韧性测试）" }
+  ],
+  "outputs": [
+    { "key": "throughput", "label": "网络总吞吐量", "type": "scalar", "unit": "件" },
+    { "key": "avg_path_length", "label": "平均路径长度", "type": "scalar" },
+    { "key": "network_resilience", "label": "网络韧性(节点故障影响)", "type": "scalar", "unit": "%" },
+    { "key": "customer_satisfaction", "label": "消费者满意度", "type": "scalar", "unit": "%" },
+    { "key": "linear_vs_dsn", "label": "传统vs DSN对比", "type": "compare" }
+  ],
+  "constraints": [
+    { "name": "balance_ok", "expression": "connection_density <= 1", "message": "供需总量平衡：网络连接密度需在合理范围" }
+  ]
+}

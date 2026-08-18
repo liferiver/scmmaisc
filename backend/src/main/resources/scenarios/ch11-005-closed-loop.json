@@ -1,0 +1,33 @@
+{
+  "chapter": { "code": "CH11", "name": "第十一章 现代物流与供应链发展", "sortNo": 11 },
+  "moduleId": "CH11-005",
+  "name": "闭环供应链与逆向物流仿真",
+  "engineKey": "closed-loop",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "闭环供应链(CLSC)、逆向物流、回收再制造、循环经济",
+  "description": "正向流：原材料→制造→分销→零售→消费者；逆向流：消费者→回收→拆解/质检→再制造/翻新/材料回收/报废；产品设计(可回收性/可拆解性)影响逆向效率和成本；再制造品定价和市场需求(新品vs再制造品竞争)；回收激励政策(押金/以旧换新)对回收率的影响；讨论为何汽车电池回收率高而消费电子低",
+  "deps": ["CH1-003"],
+  "params": [
+    { "key": "annual_sales", "label": "新品年销量", "type": "int", "unit": "万件", "min": 1, "max": 100, "step": 1, "default": 20, "description": "正向市场规模" },
+    { "key": "product_life", "label": "产品平均使用寿命", "type": "float", "unit": "年", "min": 2, "max": 10, "step": 1, "default": 5, "description": "影响可回收量" },
+    { "key": "recovery_rate", "label": "回收率", "type": "float", "min": 0.1, "max": 0.6, "step": 0.05, "default": 0.3, "description": "实际回收/理论可回收" },
+    { "key": "remanufacture_rate", "label": "可再制造率", "type": "float", "min": 0.3, "max": 0.8, "step": 0.05, "default": 0.5, "description": "回收品中可再制造比例" },
+    { "key": "remanufacture_cost_ratio", "label": "再制造成本vs新造成本", "type": "float", "min": 0.4, "max": 0.7, "step": 0.05, "default": 0.55, "description": "再制造通常省30-60%" },
+    { "key": "remanufacture_acceptance", "label": "再制造品市场接受度", "type": "float", "min": 0.5, "max": 0.95, "step": 0.05, "default": 0.7, "description": "消费者对再制造品折扣要求" },
+    { "key": "trade_in_incentive", "label": "回收激励(以旧换新金额)", "type": "float", "unit": "%", "min": 5, "max": 15, "step": 1, "default": 10, "description": "新品价格×5-15%" },
+    { "key": "material_recovery_value", "label": "拆解/材料回收价值", "type": "float", "unit": "%", "min": 10, "max": 30, "step": 1, "default": 20, "description": "物料成本的10-30%" },
+    { "key": "landfill_cost", "label": "填埋成本", "type": "float", "unit": "元/件", "min": 1, "max": 20, "step": 1, "default": 5, "description": "惩罚性成本（或禁填令）刺激回收" }
+  ],
+  "outputs": [
+    { "key": "closed_loop_profit", "label": "闭环总利润", "type": "scalar", "unit": "元" },
+    { "key": "material_recycle_rate", "label": "材料循环利用率", "type": "gauge", "unit": "%" },
+    { "key": "waste_reduction", "label": "废弃物减少量", "type": "scalar", "unit": "吨" },
+    { "key": "sales_mix_series", "label": "新品vs再制造品销售比例", "type": "series", "unit": "%" },
+    { "key": "incentive_roi", "label": "回收激励ROI", "type": "scalar", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "quality_ok", "expression": "remanufacture_cost_ratio >= 0.4", "message": "再制造品质量需≥新品（或明确标注差异），成本节省不宜过低" }
+  ]
+}

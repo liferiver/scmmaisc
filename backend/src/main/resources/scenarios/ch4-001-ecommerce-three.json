@@ -1,0 +1,29 @@
+{
+  "chapter": { "code": "CH4", "name": "第四章 电子商务环境下的物流系统", "sortNo": 4 },
+  "moduleId": "CH4-001",
+  "name": "电商物流信息化-自动化-柔性化特征仿真",
+  "engineKey": "ecommerce-three",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "电商物流三化(信息化/自动化/柔性化)、大促峰值应对、瓶颈识别",
+  "description": "基线场景(日常订单) → 引入IT系统(信息化:订单自动处理) → 引入自动分拣设备(自动化:分拣效率3倍提升) → 大促峰值测试(日常10倍) → 评估三化水平对峰值应对能力的影响；先展示纯人工在大促时的崩溃表现，再逐步投入三化",
+  "deps": [],
+  "params": [
+    { "key": "daily_orders", "label": "日常日订单量", "type": "int", "unit": "单", "min": 500, "max": 50000, "step": 500, "default": 1000, "description": "基线单量" },
+    { "key": "peak_multiplier", "label": "大促峰值倍数", "type": "float", "unit": "x", "min": 3, "max": 20, "step": 1, "default": 10, "description": "峰值/日常比" },
+    { "key": "info_coverage", "label": "信息化覆盖率", "type": "float", "min": 0.3, "max": 1.0, "step": 0.05, "default": 0.7, "description": "自动化处理订单比例" },
+    { "key": "automation_invest", "label": "自动化设备投资", "type": "float", "unit": "万元", "min": 100, "max": 5000, "step": 100, "default": 1000, "description": "分拣/包装/搬运自动化" },
+    { "key": "flexibility", "label": "柔性化水平", "type": "float", "min": 0, "max": 1.0, "step": 0.05, "default": 0.5, "description": "临时工/共享仓弹性扩缩能力" },
+    { "key": "manual_handle_minutes", "label": "每单处理时间(人工)", "type": "float", "unit": "分钟", "min": 3, "max": 10, "step": 0.5, "default": 5, "description": "人工基线" }
+  ],
+  "outputs": [
+    { "key": "peak_service_time", "label": "峰值期处理时效", "type": "series", "unit": "小时" },
+    { "key": "investment_response", "label": "三化投资-峰值应对能力曲线", "type": "compare" },
+    { "key": "bottlenecks", "label": "瓶颈环节识别", "type": "topo" },
+    { "key": "peak_unit_cost", "label": "峰值期单位成本", "type": "scalar", "unit": "元/单" }
+  ],
+  "constraints": [
+    { "name": "info_flex_ok", "expression": "info_coverage + flexibility >= 0.8", "message": "信息化与柔性化合计水平需 ≥ 0.8，否则峰值期内订单积压可能超过 2 天" }
+  ]
+}

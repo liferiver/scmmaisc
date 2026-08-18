@@ -1,0 +1,32 @@
+{
+  "chapter": { "code": "CH10", "name": "第十章 全球供应链", "sortNo": 10 },
+  "moduleId": "CH10-005",
+  "name": "全球供应链金融(跨境融资)仿真",
+  "engineKey": "cb-finance",
+  "difficulty": "advanced",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "跨境供应链金融、信用证(L/C)、出口信贷、汇率风险对冲",
+  "description": "国际贸易场景：中国出口商→美国进口商(30-90天账期)；融资工具：信用证L/C(进口商银行开证→出口商发货→交单→银行付款降低信用风险)、出口保理(应收账款卖断给保理商提前收款)、福费廷(中长期应收款无追索贴现)；汇率管理：远期结汇/期权锁定汇率；模拟人民币升值3%情景观察不同对冲策略损益差异",
+  "deps": ["CH9-001", "CH5-005"],
+  "params": [
+    { "key": "contract_amount", "label": "出口合同金额", "type": "float", "unit": "万美元", "min": 10, "max": 1000, "step": 10, "default": 100, "description": "贸易金额" },
+    { "key": "payment_terms", "label": "账期", "type": "int", "unit": "天", "min": 30, "max": 180, "step": 10, "default": 90, "description": "应收账款期限" },
+    { "key": "exchange_rate", "label": "CNY/USD汇率", "type": "float", "min": 6.5, "max": 7.5, "step": 0.05, "default": 7.0, "description": "当前汇率" },
+    { "key": "fx_volatility", "label": "汇率年化波动率", "type": "float", "min": 0.03, "max": 0.10, "step": 0.01, "default": 0.05, "description": "波动率" },
+    { "key": "lc_fee_rate", "label": "L/C开证费率", "type": "float", "unit": "%", "min": 1, "max": 3, "step": 0.1, "default": 1.5, "description": "信用证成本" },
+    { "key": "factoring_discount_rate", "label": "出口保理贴现率", "type": "float", "min": 0.03, "max": 0.08, "step": 0.005, "default": 0.05, "description": "年化" },
+    { "key": "forward_rate", "label": "远期结汇汇率", "type": "float", "min": 6.3, "max": 7.4, "step": 0.05, "default": 6.9, "description": "银行远期报价" },
+    { "key": "importer_rating", "label": "进口商信用评级", "type": "enum", "options": [ { "label": "AAA", "value": "AAA" }, { "label": "AA", "value": "AA" }, { "label": "A", "value": "A" }, { "label": "BBB", "value": "BBB" } ], "default": "AA", "description": "违约风险" },
+    { "key": "hedge_ratio", "label": "对冲比例", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.5, "description": "远期结汇覆盖比例" }
+  ],
+  "outputs": [
+    { "key": "cost_compare", "label": "各融资方案成本对比", "type": "compare", "unit": "元" },
+    { "key": "fx_exposure", "label": "汇率风险暴露", "type": "scalar", "unit": "元" },
+    { "key": "actual_receipt_compare", "label": "实际收款金额(CNY)", "type": "compare", "unit": "元" },
+    { "key": "best_combo", "label": "最优融资+对冲组合", "type": "scalar" }
+  ],
+  "constraints": [
+    { "name": "cost_within_margin", "expression": "factoring_discount_rate < 0.08", "message": "融资成本需不超过利润率" }
+  ]
+}

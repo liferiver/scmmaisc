@@ -1,0 +1,33 @@
+{
+  "chapter": { "code": "CH3", "name": "第三章 物流技术与信息系统", "sortNo": 3 },
+  "moduleId": "CH3-006",
+  "name": "冷链物流温控与断链预警仿真",
+  "engineKey": "cold-chain",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "温控区间、断链检测、温度衰减、HACCP、IoT传感器、两级预警",
+  "description": "冷链品出库(设定温区) → IoT传感器持续采集温度 → 运输/装卸/暂存各节点 → 温度偏离阈值检测 → 断链预警(黄/红) → 质量衰减计算 → 到达验收 → 断链追溯分析；模拟一次设备故障导致断链并计算质量损失",
+  "deps": [],
+  "params": [
+    { "key": "temp_zone", "label": "产品温区要求", "type": "enum", "default": "frozen", "options": [ { "label": "深冻 ≤-25°C", "value": "deep_frozen" }, { "label": "冷冻 -18°C", "value": "frozen" }, { "label": "冷藏 0-5°C", "value": "chilled" }, { "label": "恒温 15-25°C", "value": "thermostatic" } ], "description": "产品温敏类型" },
+    { "key": "sample_interval", "label": "温度采集频率", "type": "float", "unit": "秒", "min": 10, "max": 300, "step": 10, "default": 60, "description": "IoT 上报频率" },
+    { "key": "ambient_temp", "label": "环境温度(外部)", "type": "dist", "default": { "distType": "normal", "mean": 25, "sigma": 8 }, "description": "外部温度分布 dist{normal,25,8}°C" },
+    { "key": "exposure_minutes", "label": "装卸环节暴露时长", "type": "float", "unit": "分钟", "min": 5, "max": 60, "step": 5, "default": 15, "description": "装卸时脱离温控的时间" },
+    { "key": "failure_prob", "label": "设备故障概率", "type": "float", "unit": "/小时", "min": 0.001, "max": 0.05, "step": 0.001, "default": 0.01, "description": "冷藏设备故障率" },
+    { "key": "yellow_threshold", "label": "黄色预警阈值", "type": "float", "unit": "°C", "min": 1, "max": 5, "step": 0.5, "default": 2, "description": "偏离目标 ±2°C 触发黄色预警（V2 文档 float[2] 转写）" },
+    { "key": "red_threshold", "label": "红色预警阈值", "type": "float", "unit": "°C", "min": 3, "max": 10, "step": 0.5, "default": 5, "description": "偏离目标 ±5°C 触发红色预警（V2 文档 float[2] 转写）" },
+    { "key": "response_minutes", "label": "断链响应时间", "type": "float", "unit": "分钟", "min": 5, "max": 60, "step": 5, "default": 15, "description": "从预警到处理" }
+  ],
+  "outputs": [
+    { "key": "temp_curve", "label": "全程温度曲线", "type": "series", "unit": "°C" },
+    { "key": "break_events", "label": "断链事件次数与时长", "type": "series", "unit": "分钟" },
+    { "key": "quality_decay", "label": "质量衰减指数", "type": "series" },
+    { "key": "risk_heatmap", "label": "断链风险点热力图", "type": "heatmap" },
+    { "key": "loss_rate", "label": "货损率", "type": "scalar", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "threshold_ok", "expression": "yellow_threshold < red_threshold", "message": "黄色预警阈值需小于红色预警阈值" },
+    { "name": "break_total_ok", "expression": "response_minutes <= 30", "message": "断链累计时长需小于 30 分钟（药品）" }
+  ]
+}

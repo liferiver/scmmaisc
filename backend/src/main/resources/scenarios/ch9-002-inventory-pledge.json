@@ -1,0 +1,36 @@
+{
+  "chapter": { "code": "CH9", "name": "第九章 供应链金融", "sortNo": 9 },
+  "moduleId": "CH9-002",
+  "name": "库存质押融资动态仿真",
+  "engineKey": "inventory-pledge",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "存货/仓单质押、动态质押、质押率维持、警戒线/平仓线、补货赎货",
+  "description": "企业以库存货物质押给银行→银行核定质押物价值→按质押率放款；日常管理：销售赎货→质押物减少、补货→追加质押；质押物价格波动：价值下跌→质押率升高→触及警戒线(70%)要求追加保证金或补货→触及平仓线(85%)银行处置质押物；注入大宗商品价格暴跌事件观察风险传染",
+  "deps": [],
+  "params": [
+    { "key": "initial_inventory_value", "label": "初始库存价值", "type": "float", "unit": "万元", "min": 500, "max": 50000, "step": 500, "default": 10000, "description": "质押物初始价值" },
+    { "key": "initial_pledge_rate", "label": "初始质押率", "type": "float", "min": 0.5, "max": 0.7, "step": 0.05, "default": 0.6, "description": "贷款/质押物价值" },
+    { "key": "warning_line", "label": "警戒线", "type": "float", "min": 0.5, "max": 0.8, "step": 0.05, "default": 0.7, "description": "质押率达警戒线需追加保证金或补货" },
+    { "key": "liquidation_line", "label": "平仓线", "type": "float", "min": 0.7, "max": 0.95, "step": 0.05, "default": 0.85, "description": "触及平仓线强制处置质押物" },
+    { "key": "price_volatility", "label": "商品价格日波动率σ", "type": "float", "min": 0.005, "max": 0.03, "step": 0.005, "default": 0.015, "description": "对大宗商品尤其重要" },
+    { "key": "price_drift", "label": "价格漂移μ", "type": "float", "min": -0.001, "max": 0.001, "step": 0.0005, "default": 0, "description": "价格趋势" },
+    { "key": "daily_redeem_qty", "label": "日销售/赎货量", "type": "float", "unit": "件", "min": 10, "max": 500, "step": 10, "default": 100, "description": "企业正常经营流出" },
+    { "key": "restock_cycle", "label": "补货频率", "type": "int", "unit": "天", "min": 1, "max": 30, "step": 1, "default": 7, "description": "补货周期" },
+    { "key": "collateral_type", "label": "质押物类型", "type": "enum", "options": [ { "label": "大宗商品", "value": "bulk_commodity" }, { "label": "标准工业品", "value": "standard_industrial" }, { "label": "消费品", "value": "consumer_goods" } ], "default": "bulk_commodity", "description": "流动性不同" },
+    { "key": "disposal_discount", "label": "处置折价率", "type": "float", "min": 0.7, "max": 0.9, "step": 0.05, "default": 0.8, "description": "平仓时快速处置的折价" },
+    { "key": "sim_days", "label": "仿真天数", "type": "int", "unit": "天", "min": 30, "max": 360, "step": 30, "default": 180, "description": "动态监控时长（平台补充参数）" }
+  ],
+  "outputs": [
+    { "key": "pledge_rate_series", "label": "质押率动态变化曲线", "type": "series", "unit": "%" },
+    { "key": "margin_call_count", "label": "追加保证金次数", "type": "scalar", "unit": "次" },
+    { "key": "liquidation_probability", "label": "平仓概率", "type": "scalar", "unit": "%" },
+    { "key": "bank_exposure_series", "label": "银行风险敞口", "type": "series", "unit": "元" },
+    { "key": "available_credit_series", "label": "企业资金可用额度变化", "type": "series", "unit": "元" }
+  ],
+  "constraints": [
+    { "name": "warning_below_liquidation", "expression": "warning_line < liquidation_line", "message": "警戒线必须低于平仓线（警戒触发追加，平仓触发处置）" },
+    { "name": "no_over_pledge", "expression": "initial_pledge_rate < liquidation_line", "message": "初始质押率不得超出平仓线" }
+  ]
+}

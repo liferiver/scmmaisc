@@ -1,0 +1,28 @@
+{
+  "chapter": { "code": "CH8", "name": "第八章 供应链协同", "sortNo": 8 },
+  "moduleId": "CH8-008",
+  "name": "供应链合同谈判综合博弈仿真",
+  "engineKey": "negotiation",
+  "difficulty": "comprehensive",
+  "classHours": 3,
+  "isRolePlay": true,
+  "concept": "五种合同对比、合同选择、谈判博弈、Pareto 改进",
+  "description": "设定市场场景(产品特性/需求特征/成本结构) → 供应商组和零售商组分别评估五种合同(批发价/回购/收益共享/数量折扣/数量柔性)利弊 → 选择 2-3 种候选合同双边谈判(w/b/φ 等参数) → 达成协议(或未达成)计算各方利润+供应链效率 → 多轮不同场景归纳什么产品适合什么合同",
+  "deps": ["CH8-004", "CH8-005", "CH8-006", "CH8-007"],
+  "params": [
+    { "key": "scene_type", "label": "市场场景", "type": "enum", "options": [ { "label": "时尚品", "value": "fashion" }, { "label": "功能品", "value": "functional" }, { "label": "高固定成本", "value": "high_fixed_cost" }, { "label": "高需求不确定", "value": "high_demand_uncertainty" }, { "label": "长提前期", "value": "long_lead_time" } ], "default": "fashion", "description": "场景库：产品特性/需求特征/成本结构" },
+    { "key": "contract_type", "label": "合同类型", "type": "enum", "options": [ { "label": "批发价合同", "value": "wholesale" }, { "label": "回购合同", "value": "buyback" }, { "label": "收益共享合同", "value": "revenue_sharing" }, { "label": "数量折扣合同", "value": "qty_discount" }, { "label": "数量柔性合同", "value": "qty_flexibility" } ], "default": "buyback", "description": "五种合同模板（参数参照 8.4-8.7）" },
+    { "key": "negotiation_minutes", "label": "谈判时间约束", "type": "int", "unit": "分钟", "min": 10, "max": 20, "step": 1, "default": 15, "description": "每轮谈判限时" },
+    { "key": "target_efficiency", "label": "目标供应链效率", "type": "float", "min": 0.7, "max": 1.0, "step": 0.05, "default": 0.9, "description": "谈判达成的最低效率目标" }
+  ],
+  "outputs": [
+    { "key": "profit_compare", "label": "各方利润", "type": "compare", "unit": "元" },
+    { "key": "contract_efficiency", "label": "合同效率", "type": "gauge", "unit": "%" },
+    { "key": "scene_contract_map", "label": "各场景最优合同", "type": "heatmap" },
+    { "key": "deal_rate", "label": "谈判达成率", "type": "scalar", "unit": "%" },
+    { "key": "pareto_gain", "label": "Pareto改进幅度", "type": "scalar", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "incentive_ok", "expression": "target_efficiency <= 1", "message": "合同需满足激励相容和参与约束（双方利润均需优于无协议底线）" }
+  ]
+}

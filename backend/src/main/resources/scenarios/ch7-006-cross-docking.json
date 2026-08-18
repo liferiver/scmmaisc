@@ -1,0 +1,32 @@
+{
+  "chapter": { "code": "CH7", "name": "第七章 供应链设计与构建", "sortNo": 7 },
+  "moduleId": "CH7-006",
+  "name": "越库配送(Cross-Docking)与直接转运仿真",
+  "engineKey": "cross-docking",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "越库配送(Cross-Docking)、直接运输(Direct Shipment)、仓储配送(Warehousing)、转运策略选择",
+  "description": "供应商发货→到达越库中心→按目的地分拣(不存储,<24h) → 与其他供应商货物合并装载→发往各门店/客户；对比三种策略: 直运(供应商→客户,高运输成本/无库存) / 越库(合并转运,中运输成本/极低库存) / 入仓(存储配送,低运输成本/有库存)；讨论沃尔玛越库配送的成功条件",
+  "deps": ["CH5-002", "CH7-001"],
+  "params": [
+    { "key": "supplier_count", "label": "供应商数量", "type": "int", "unit": "家", "min": 5, "max": 50, "step": 1, "default": 15, "description": "上游数" },
+    { "key": "store_count", "label": "客户/门店数量", "type": "int", "unit": "个", "min": 10, "max": 200, "step": 10, "default": 60, "description": "下游数" },
+    { "key": "crossdock_candidates", "label": "越库中心候选位置", "type": "int", "unit": "个", "min": 1, "max": 10, "step": 1, "default": 3, "description": "可选越库点" },
+    { "key": "full_truck_rate", "label": "整车运输费率", "type": "float", "unit": "元/吨公里", "min": 1, "max": 10, "step": 0.5, "default": 3, "description": "整车便宜（V2 文档整车vs零担转写）" },
+    { "key": "ltl_rate", "label": "零担运输费率", "type": "float", "unit": "元/吨公里", "min": 3, "max": 20, "step": 0.5, "default": 8, "description": "零担贵（V2 文档整车vs零担转写）" },
+    { "key": "crossdock_hours", "label": "越库处理时间", "type": "float", "unit": "小时", "min": 2, "max": 24, "step": 1, "default": 6, "description": "越库速度" },
+    { "key": "crossdock_cost", "label": "越库处理成本", "type": "float", "unit": "元/吨", "min": 10, "max": 100, "step": 5, "default": 30, "description": "越库操作费" },
+    { "key": "holding_cost", "label": "库存持有成本", "type": "float", "unit": "元/件·年", "min": 1, "max": 100, "step": 1, "default": 20, "description": "DC 模式使用" },
+    { "key": "store_demand", "label": "门店日需求矩阵", "type": "matrix", "description": "每门店日需求（V2 文档 float[] 各门店不同转写）" }
+  ],
+  "outputs": [
+    { "key": "total_cost_compare", "label": "三种策略总成本对比", "type": "compare", "unit": "元" },
+    { "key": "loading_rate", "label": "运输效率(装载率)", "type": "compare", "unit": "%" },
+    { "key": "inventory_level", "label": "库存水平", "type": "compare", "unit": "件" },
+    { "key": "best_strategy", "label": "最优策略推荐", "type": "scalar" }
+  ],
+  "constraints": [
+    { "name": "crossdock_time_ok", "expression": "crossdock_hours < 24", "message": "越库停留需小于 24 小时；保证门店不断货" }
+  ]
+}

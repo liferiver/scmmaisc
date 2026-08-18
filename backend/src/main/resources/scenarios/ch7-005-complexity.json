@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH7", "name": "第七章 供应链设计与构建", "sortNo": 7 },
+  "moduleId": "CH7-005",
+  "name": "供应链复杂度管理仿真",
+  "engineKey": "complexity",
+  "difficulty": "advanced",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "供应链复杂度(产品/流程/组织复杂度)、复杂度成本、简化策略",
+  "description": "企业产品组合分析(SKU数量/变体/BOM层级/供应商数量/客户数量) → 复杂度度量(结构复杂度/动态复杂度) → 复杂度对成本的影响模拟(复杂度↑→间接成本非线性↑) → 简化策略评估(SKU精简/平台化/模块化/供应商整合)；分析真实品牌的 SKU 精简案例，讨论砍掉长尾 SKU 对客户满意度的影响",
+  "deps": [],
+  "params": [
+    { "key": "sku_count", "label": "SKU数量", "type": "int", "unit": "个", "min": 50, "max": 10000, "step": 50, "default": 1000, "description": "产品复杂度主因" },
+    { "key": "bom_levels", "label": "BOM平均层级", "type": "float", "unit": "层", "min": 2, "max": 8, "step": 0.5, "default": 4, "description": "制造复杂度" },
+    { "key": "supplier_count", "label": "供应商数量", "type": "int", "unit": "家", "min": 20, "max": 500, "step": 10, "default": 100, "description": "采购复杂度" },
+    { "key": "customer_count", "label": "客户数量", "type": "int", "unit": "个", "min": 50, "max": 5000, "step": 50, "default": 500, "description": "需求复杂度" },
+    { "key": "sku_sales_dist", "label": "每SKU年销量分布", "type": "dist", "default": { "distType": "normal", "mean": 1000, "sigma": 500 }, "description": "Pareto 长尾分布（少数 SKU 占大多数销量）" },
+    { "key": "complexity_cost_factor", "label": "复杂度成本系数", "type": "float", "min": 1.2, "max": 3.0, "step": 0.1, "default": 1.8, "description": "每增加一倍复杂度成本增加率" },
+    { "key": "sku_reduction_ratio", "label": "SKU精简比例", "type": "float", "min": 0, "max": 0.8, "step": 0.05, "default": 0.3, "description": "可调变量：长尾 SKU 裁减比例" }
+  ],
+  "outputs": [
+    { "key": "pareto_curve", "label": "Pareto曲线(SKU-销量)", "type": "series" },
+    { "key": "complexity_cost_curve", "label": "复杂度-成本曲线", "type": "series", "unit": "元" },
+    { "key": "cost_saving", "label": "精简后成本节省", "type": "scalar", "unit": "元" },
+    { "key": "complexity_index", "label": "复杂度指数", "type": "scalar" },
+    { "key": "longtail_profit", "label": "长尾SKU利润贡献", "type": "compare", "unit": "元" }
+  ],
+  "constraints": [
+    { "name": "reduction_ok", "expression": "sku_reduction_ratio <= 0.8", "message": "精简 SKU 时需注意客户捆绑购买关系（精简比例需 ≤ 80%）" }
+  ]
+}

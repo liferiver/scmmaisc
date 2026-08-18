@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH4", "name": "第四章 电子商务环境下的物流系统", "sortNo": 4 },
+  "moduleId": "CH4-005",
+  "name": "菜鸟平台型物流大数据调度仿真",
+  "engineKey": "cainiao",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "平台型物流、大数据调度、电子面单、菜鸟驿站、社会物流整合",
+  "description": "商家入驻菜鸟平台 → 平台接收订单 → 大数据路由(选最优快递/仓) → 电子面单生成(统一标准) → 快递公司揽收→中转→派送 → 菜鸟驿站/自提柜末端 → 消费者取件→评价反馈；对比京东自营(重垂直)和菜鸟平台(轻整合)的优劣势与适用边界",
+  "deps": ["CH1-008"],
+  "params": [
+    { "key": "carrier_count", "label": "合作快递公司数", "type": "int", "unit": "家", "min": 5, "max": 20, "step": 1, "default": 10, "description": "可调度运力池" },
+    { "key": "warehouse_count", "label": "合作仓储数", "type": "int", "unit": "个", "min": 10, "max": 200, "step": 10, "default": 50, "description": "菜鸟仓网络" },
+    { "key": "daily_orders_10m", "label": "日订单量", "type": "float", "unit": "千万", "min": 1, "max": 10, "step": 0.5, "default": 3, "description": "平台规模" },
+    { "key": "routing_strategy", "label": "路由算法策略", "type": "enum", "default": "balanced", "options": [ { "label": "成本最优", "value": "cost" }, { "label": "时效最优", "value": "time" }, { "label": "均衡", "value": "balanced" } ], "description": "调度策略" },
+    { "key": "station_density", "label": "驿站密度", "type": "float", "unit": "个/万人", "min": 0.5, "max": 5, "step": 0.1, "default": 2, "description": "末端覆盖" },
+    { "key": "capacity_elasticity", "label": "快递公司产能弹性", "type": "float", "unit": "x", "min": 1.2, "max": 2.0, "step": 0.05, "default": 1.5, "description": "大促弹性空间" }
+  ],
+  "outputs": [
+    { "key": "delivery_time", "label": "平均配送时效", "type": "series", "unit": "小时" },
+    { "key": "unit_cost", "label": "单均成本", "type": "scalar", "unit": "元/单" },
+    { "key": "dispatch_balance", "label": "快递公司调度均衡度", "type": "gauge", "unit": "%" },
+    { "key": "peak_gap", "label": "高峰期运力缺口", "type": "scalar", "unit": "万单" },
+    { "key": "complaint_rate", "label": "消费者投诉率", "type": "series", "unit": "‰" }
+  ],
+  "constraints": [
+    { "name": "peak_capacity_ok", "expression": "daily_orders_10m <= capacity_elasticity * 5", "message": "双11峰值不爆仓：日订单量(千万)需 ≤ 产能弹性×5，合作快递公司产能不可过载" }
+  ]
+}

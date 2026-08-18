@@ -1,0 +1,29 @@
+{
+  "chapter": { "code": "CH2", "name": "第二章 物流系统控制", "sortNo": 2 },
+  "moduleId": "CH2-005",
+  "name": "允许缺货的EOQ模型仿真",
+  "engineKey": "stockout-eoq",
+  "difficulty": "intro",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "缺货成本、延期交货(backorder)、最大缺货量S、Q*=√(2C2D/C1·(C1+C3)/C3)",
+  "description": "库存正常消耗 → 库存归零 → 持续接收订单(延期交货) → 缺货量累积 → 补货到达 → 先补足缺货 → 剩余进入库存 → 正常消耗；比较允许缺货与不允许缺货的总成本",
+  "deps": ["CH2-003"],
+  "params": [
+    { "key": "annual_demand", "label": "年需求量D", "type": "int", "unit": "单位/年", "min": 100, "max": 100000, "step": 100, "default": 10000, "description": "全年总需求量" },
+    { "key": "order_cost", "label": "单次订货成本", "type": "float", "unit": "元/次", "min": 10, "max": 5000, "step": 10, "default": 100, "description": "订货成本" },
+    { "key": "holding_cost", "label": "单位年持有成本", "type": "float", "unit": "元/单位·年", "min": 1, "max": 500, "step": 1, "default": 2, "description": "持有成本" },
+    { "key": "backorder_cost", "label": "单位年缺货成本", "type": "float", "unit": "元/单位·年", "min": 3, "max": 5000, "step": 1, "default": 10, "description": "通常为持有成本的 1.5~10 倍（默认值教材典型值）" }
+  ],
+  "outputs": [
+    { "key": "q_star", "label": "最优订货量Q*", "type": "scalar", "unit": "单位" },
+    { "key": "backorder_qty", "label": "最大缺货量S*", "type": "scalar", "unit": "单位" },
+    { "key": "max_inventory", "label": "最大库存水平", "type": "scalar", "unit": "单位" },
+    { "key": "total_cost", "label": "年总成本", "type": "scalar", "unit": "元" },
+    { "key": "cost_compare", "label": "缺货vs不缺货总成本对比", "type": "compare", "unit": "元" },
+    { "key": "stockout_ratio", "label": "缺货周期占比", "type": "scalar", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "s_le_q", "expression": "backorder_qty <= q_star", "message": "最大缺货量 S 不得超过订货量 Q" }
+  ]
+}

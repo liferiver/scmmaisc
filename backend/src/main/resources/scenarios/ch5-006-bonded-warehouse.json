@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH5", "name": "第五章 跨境物流管理", "sortNo": 5 },
+  "moduleId": "CH5-006",
+  "name": "保税仓布局与运营仿真",
+  "engineKey": "bonded-warehouse",
+  "difficulty": "advanced",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "保税仓、正面清单、关税暂免、1210/9610模式、备货策略",
+  "description": "商家将商品批量运至中国境内保税仓(入区无需缴税) → 消费者下单 → 保税仓内拣货 → 清关(行邮税/跨境综合税) → 国内快递配送 → 消费者签收 → 滞销品处理(退回境外或内销补税)；与直邮/海外仓模式对比，为不同品类选择最优跨境物流方案",
+  "deps": ["CH5-001"],
+  "params": [
+    { "key": "goods_category", "label": "商品品类", "type": "enum", "default": "beauty", "options": [ { "label": "美妆", "value": "beauty" }, { "label": "母婴", "value": "baby" }, { "label": "保健", "value": "health" }, { "label": "食品", "value": "food" }, { "label": "家电", "value": "appliance" } ], "description": "正面清单受限" },
+    { "key": "sku_count", "label": "SKU数量", "type": "int", "unit": "个", "min": 50, "max": 5000, "step": 50, "default": 500, "description": "备货 SKU 数" },
+    { "key": "sku_stock_qty", "label": "单SKU备货量", "type": "int", "unit": "件", "min": 100, "max": 50000, "step": 100, "default": 2000, "description": "每 SKU 备货深度" },
+    { "key": "tax_rate", "label": "行邮税率/跨境综合税率", "type": "float", "min": 0.091, "max": 0.25, "step": 0.001, "default": 0.15, "description": "跨境电商政策" },
+    { "key": "tax_free_quota", "label": "免征税额", "type": "float", "unit": "元", "min": 0, "max": 5000, "step": 100, "default": 2000, "description": "个人年度限额" },
+    { "key": "slow_sell_rate", "label": "滞销率", "type": "float", "min": 0.05, "max": 0.3, "step": 0.01, "default": 0.15, "description": "备货不准导致滞销" },
+    { "key": "storage_fee", "label": "保税仓单位仓储费", "type": "float", "unit": "元/件·天", "min": 0.01, "max": 0.5, "step": 0.01, "default": 0.1, "description": "仓租成本" }
+  ],
+  "outputs": [
+    { "key": "unit_logistics_cost", "label": "单均物流成本", "type": "scalar", "unit": "元/单" },
+    { "key": "delivery_time", "label": "配送时效", "type": "series", "unit": "天" },
+    { "key": "slow_sell_loss", "label": "滞销损失", "type": "scalar", "unit": "万元" },
+    { "key": "accuracy_vs_loss", "label": "备货准确率vs滞销率", "type": "series" },
+    { "key": "mode_compare", "label": "保税vs直邮vs海外仓对比", "type": "compare", "unit": "元/单" }
+  ],
+  "constraints": [
+    { "name": "quota_ok", "expression": "tax_free_quota <= 5000", "message": "个人年度限额不超（免征税额需 ≤ 5000 元）" }
+  ]
+}

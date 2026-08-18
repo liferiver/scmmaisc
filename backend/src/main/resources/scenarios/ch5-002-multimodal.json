@@ -1,0 +1,29 @@
+{
+  "chapter": { "code": "CH5", "name": "第五章 跨境物流管理", "sortNo": 5 },
+  "moduleId": "CH5-002",
+  "name": "海运/空运/铁路/公路多式联运方案仿真",
+  "engineKey": "multimodal",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": false,
+  "concept": "多式联运、一单制、换装节点、联运成本-时效优化、Pareto最优",
+  "description": "给定起运地-目的地 → 枚举所有可行运输方案(纯海运/纯空运/纯铁路/纯公路/海铁联运/海空联运/铁公联运等) → 各方案评估总成本/总时间/碳排放/可靠性 → 多目标排序推荐最优方案；针对不同货物(高价值电子品vs大宗原材料)选择最优联运方案",
+  "deps": ["CH5-001"],
+  "params": [
+    { "key": "cargo_tonnage", "label": "货量", "type": "float", "unit": "吨", "min": 1, "max": 500, "step": 10, "default": 100, "description": "TEU/吨" },
+    { "key": "od_pair", "label": "起运地/目的地", "type": "enum", "default": "shanghai_la", "options": [ { "label": "上海→洛杉矶", "value": "shanghai_la" }, { "label": "深圳→汉堡", "value": "shenzhen_hamburg" }, { "label": "重庆→杜伊斯堡", "value": "chongqing_duisburg" }, { "label": "天津→新加坡", "value": "tianjin_singapore" } ], "description": "实际城市对" },
+    { "key": "mode_attrs", "label": "各运输方式属性矩阵", "type": "matrix", "description": "每种方式的成本(元/TEU·km)/速度(km/h)/可靠性/碳排放(g/TEU·km)：海运0.5-2/30-40/中/15-30，空运10-30/800-900/高/500-800，铁路2-6/80-120/高/20-40，公路5-15/60-80/中/80-150" },
+    { "key": "transfer_cost", "label": "换装节点成本", "type": "float", "unit": "元/节点", "min": 1000, "max": 50000, "step": 1000, "default": 10000, "description": "转关/换装费用（V2 文档 float[] 转写）" },
+    { "key": "transfer_time", "label": "换装节点时间", "type": "float", "unit": "小时/节点", "min": 2, "max": 72, "step": 2, "default": 12, "description": "转关/换装时间（V2 文档 float[] 转写）" },
+    { "key": "time_priority", "label": "时效优先级", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.5, "description": "1=绝对时效优先，0=绝对成本优先" }
+  ],
+  "outputs": [
+    { "key": "cost_time_scatter", "label": "各方案成本-时效散点图", "type": "compare" },
+    { "key": "pareto_set", "label": "Pareto最优方案集", "type": "compare" },
+    { "key": "carbon_compare", "label": "碳排放对比", "type": "compare", "unit": "g/TEU·km" },
+    { "key": "best_plan", "label": "推荐方案详情", "type": "scalar" }
+  ],
+  "constraints": [
+    { "name": "deadline_ok", "expression": "time_priority <= 1", "message": "需满足最晚交付时间（时效优先级越高越需选择更快方案）" }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH5", "name": "第五章 跨境物流管理", "sortNo": 5 },
+  "moduleId": "CH5-004",
+  "name": "中欧班列运营网络与货物品类仿真",
+  "engineKey": "crer",
+  "difficulty": "advanced",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "中欧班列、集结中心、换装站(轨距变换)、班列频次、适箱货物品类",
+  "description": "中国集结中心(重庆/成都/西安/郑州/义乌) → 国内铁路运输(标准轨) → 口岸换装(阿拉山口/霍尔果斯/满洲里/二连浩特) → 宽轨段运输 → 欧洲枢纽(马拉舍维奇/杜伊斯堡/汉堡) → 分拨到各地 → 班列频次+装载率+时效评估；讨论中欧班列对海运太慢/空运太贵中间地带的价值",
+  "deps": ["CH5-001", "CH5-002"],
+  "params": [
+    { "key": "origin_city", "label": "始发城市", "type": "enum", "default": "chongqing", "options": [ { "label": "重庆", "value": "chongqing" }, { "label": "成都", "value": "chengdu" }, { "label": "西安", "value": "xian" }, { "label": "郑州", "value": "zhengzhou" }, { "label": "武汉", "value": "wuhan" }, { "label": "义乌", "value": "yiwu" } ], "description": "集结中心选择" },
+    { "key": "exit_port", "label": "出境口岸", "type": "enum", "default": "alashankou", "options": [ { "label": "阿拉山口", "value": "alashankou" }, { "label": "霍尔果斯", "value": "horgos" }, { "label": "满洲里", "value": "manzhouli" }, { "label": "二连浩特", "value": "erlianhot" } ], "description": "口岸容量不同" },
+    { "key": "train_frequency", "label": "班列频次", "type": "int", "unit": "班/周", "min": 1, "max": 7, "step": 1, "default": 3, "description": "影响等待时间" },
+    { "key": "loading_rate", "label": "装载率", "type": "float", "min": 0.5, "max": 1.0, "step": 0.05, "default": 0.8, "description": "影响经济性" },
+    { "key": "cargo_category", "label": "货物品类", "type": "enum", "default": "electronics", "options": [ { "label": "电子产品", "value": "electronics" }, { "label": "汽车零部件", "value": "auto_parts" }, { "label": "服装", "value": "apparel" }, { "label": "食品", "value": "food" }, { "label": "跨境电商包裹", "value": "ecommerce" } ], "description": "不同品类适用性" },
+    { "key": "eu_distribution_days", "label": "欧洲端分拨时间", "type": "float", "unit": "天", "min": 1, "max": 5, "step": 0.5, "default": 2, "description": "枢纽到最终目的" },
+    { "key": "balance_ratio", "label": "双向平衡率", "type": "float", "min": 0.3, "max": 0.8, "step": 0.05, "default": 0.5, "description": "西向 vs 东向货量比" }
+  ],
+  "outputs": [
+    { "key": "total_transit_time", "label": "全程运输时间", "type": "series", "unit": "天" },
+    { "key": "cost_compare", "label": "成本对比(班列vs海运vs空运)", "type": "compare", "unit": "元/TEU" },
+    { "key": "breakeven_loading", "label": "盈亏装载率", "type": "scalar", "unit": "%" },
+    { "key": "center_ranking", "label": "各集结中心竞争力排名", "type": "compare" }
+  ],
+  "constraints": [
+    { "name": "loading_ok", "expression": "loading_rate >= 0.6", "message": "装载率需大于临界盈亏点（约 60%）" }
+  ]
+}

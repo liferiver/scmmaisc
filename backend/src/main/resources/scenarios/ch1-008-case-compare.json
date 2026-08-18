@@ -1,0 +1,29 @@
+{
+  "chapter": { "code": "CH1", "name": "第一章 概论", "sortNo": 1 },
+  "moduleId": "CH1-008",
+  "name": "供应链协同创新案例仿真(京东/菜鸟/华为综合对比)",
+  "engineKey": "case-compare",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "自建物流vs平台型物流vs制造供应链、模式比较、适用条件",
+  "description": "设定企业场景(自营电商/平台电商/制造企业) → 京东模式:自建仓配一体(重资产高效率) → 菜鸟模式:平台整合社会物流(轻资产大数据调度) → 华为模式:核心自制+非核心外包(铁三角管理) → 成本-时效-控制力三维对比 → 适用条件匹配度推荐",
+  "deps": ["CH1-001", "CH1-004"],
+  "params": [
+    { "key": "revenue", "label": "企业规模(年营收)", "type": "float", "unit": "亿元", "min": 1, "max": 1000, "step": 1, "default": 100, "description": "决定资源投入能力" },
+    { "key": "daily_orders", "label": "日订单量", "type": "int", "unit": "单/天", "min": 1000, "max": 1000000, "step": 1000, "default": 100000, "description": "驱动配送需求" },
+    { "key": "cities", "label": "覆盖城市数", "type": "int", "unit": "个", "min": 10, "max": 300, "step": 5, "default": 100, "description": "网络广度要求" },
+    { "key": "time_requirement", "label": "时效要求", "type": "enum", "default": "next_day", "options": [ { "label": "次日达", "value": "next_day" }, { "label": "2-3天", "value": "two_three_days" }, { "label": "标准", "value": "standard" } ], "description": "服务标准" },
+    { "key": "capital_adequacy", "label": "自有资金充裕度", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.6, "description": "影响重资产可行性" },
+    { "key": "supplier_concentration", "label": "供应商集中度", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.5, "description": "影响管理复杂度" }
+  ],
+  "outputs": [
+    { "key": "total_cost", "label": "各模式总成本", "type": "compare", "unit": "亿元" },
+    { "key": "delivery_time", "label": "平均配送时效", "type": "compare", "unit": "天" },
+    { "key": "control_score", "label": "物流控制力评分", "type": "compare", "unit": "分" },
+    { "key": "fit_score", "label": "适用条件匹配度", "type": "scalar", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "time_ok", "expression": "delivery_time <= 时效标准", "message": "必须满足给定时效标准" }
+  ]
+}

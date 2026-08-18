@@ -34,9 +34,11 @@ public class CarbonExecutor implements ScenarioExecutor {
     @Override
     public List<String> validate(Map<String, Object> params) {
         List<String> errors = new ArrayList<>();
-        Map<String, Double> factors = distParam(params, "carbon_factors",
-                Map.of("sea", new double[]{5, 1000}, "rail", new double[]{5, 1000},
-                        "road", new double[]{5, 1000}, "air", new double[]{5, 1000}), errors);
+        Map<String, Double> factors = params.containsKey("carbon_factors")
+                ? distParam(params, "carbon_factors",
+                        Map.of("sea", new double[]{5, 1000}, "rail", new double[]{5, 1000},
+                                "road", new double[]{5, 1000}, "air", new double[]{5, 1000}), errors)
+                : null; // 可选分布：缺省时由 run() 使用内置因子
         Double electricity = doubleParam(params, "electricity_factor", 300, 800, errors);
         Double taxPrice = doubleParam(params, "carbon_tax_price", 50, 200, errors);
         Double quota = doubleParam(params, "carbon_quota", 100, 5000, errors);
@@ -65,6 +67,9 @@ public class CarbonExecutor implements ScenarioExecutor {
     public void run(Map<String, Object> params, SimContext ctx) {
         @SuppressWarnings("unchecked")
         Map<String, Object> factors = (Map<String, Object>) params.get("carbon_factors");
+        if (factors == null) {
+            factors = Map.of("sea", 150.0, "rail", 30.0, "road", 150.0, "air", 700.0); // 缺省排放因子
+        }
         double electricity = ((Number) params.get("electricity_factor")).doubleValue();
         double taxPrice = ((Number) params.get("carbon_tax_price")).doubleValue();
         double quota = ((Number) params.get("carbon_quota")).doubleValue();

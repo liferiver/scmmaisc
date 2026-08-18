@@ -1,0 +1,41 @@
+{
+  "chapter": { "code": "CH11", "name": "第十一章 现代物流与供应链发展", "sortNo": 11 },
+  "moduleId": "CH11-008",
+  "name": "冷链物流质量衰减模型仿真",
+  "engineKey": "cold-chain-decay",
+  "difficulty": "advanced",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "冷链断链、温度-质量衰减关系(Arrhenius简化)、剩余货架期(Shelf Life)、TTI时间温度指示器",
+  "description": "冷链产品从产地到消费者全程温度监控：每个环节(预冷/冷藏运输/冷库/配送)的温度和时间记录→质量衰减模型：质量衰减=∑(温度偏离×持续时间×产品敏感系数)→断链事件(装卸暴露/设备故障→温度跃升→加速衰减)→到达消费者时剩余货架期预测；对比全程严格温控vs一次断链2小时vs多次小幅温度波动对最终质量的影响",
+  "deps": ["CH3-006"],
+  "params": [
+    { "key": "product_type", "label": "产品类型", "type": "enum", "options": [ { "label": "生鲜果蔬", "value": "fresh" }, { "label": "冷冻肉", "value": "frozen" }, { "label": "冰淇淋", "value": "icecream" }, { "label": "疫苗", "value": "vaccine" }, { "label": "血液制品", "value": "blood" } ], "default": "fresh", "description": "温敏度不同" },
+    { "key": "temp_min", "label": "最适温度下限", "type": "float", "unit": "℃", "min": -30, "max": 5, "step": 1, "default": 0, "description": "T_min" },
+    { "key": "temp_max", "label": "最适温度上限", "type": "float", "unit": "℃", "min": 0, "max": 15, "step": 1, "default": 4, "description": "T_max" },
+    { "key": "sensitivity", "label": "温度敏感系数", "type": "float", "min": 1, "max": 10, "step": 0.5, "default": 3, "description": "单位温度偏离的质量损失速率" },
+    { "key": "initial_shelf_life", "label": "初始货架期", "type": "float", "unit": "天", "min": 5, "max": 90, "step": 1, "default": 21, "description": "100%质量=出厂状态" },
+    { "key": "precool_hours", "label": "预冷环节时长", "type": "float", "unit": "小时", "min": 0.5, "max": 6, "step": 0.5, "default": 2, "description": "环节时间分配" },
+    { "key": "transport_hours", "label": "冷藏运输时长", "type": "float", "unit": "小时", "min": 4, "max": 72, "step": 2, "default": 24, "description": "环节时间分配" },
+    { "key": "storage_hours", "label": "冷库仓储时长", "type": "float", "unit": "小时", "min": 12, "max": 168, "step": 6, "default": 48, "description": "环节时间分配" },
+    { "key": "delivery_hours", "label": "配送环节时长", "type": "float", "unit": "小时", "min": 1, "max": 12, "step": 1, "default": 4, "description": "环节时间分配" },
+    { "key": "shelf_hours", "label": "货架展示时长", "type": "float", "unit": "小时", "min": 24, "max": 240, "step": 12, "default": 96, "description": "环节时间分配" },
+    { "key": "loading_exposure_minutes", "label": "装卸暴露时长", "type": "float", "unit": "分钟", "min": 5, "max": 60, "step": 5, "default": 15, "description": "断链关键点" },
+    { "key": "loading_ambient_temp", "label": "装卸环境温度", "type": "float", "unit": "℃", "min": 20, "max": 40, "step": 1, "default": 30, "description": "环境温度" },
+    { "key": "equipment_failure_rate", "label": "制冷设备故障概率", "type": "float", "min": 0.001, "max": 0.02, "step": 0.001, "default": 0.005, "description": "设备可靠性" },
+    { "key": "use_tti", "label": "TTI标签", "type": "bool", "default": true, "description": "是否使用时间温度指示器" },
+    { "key": "temp_profile", "label": "全程温度曲线", "type": "timeseries", "description": "按分钟/小时记录的各环节温度" }
+  ],
+  "outputs": [
+    { "key": "temp_curve", "label": "全程温度曲线", "type": "series", "unit": "℃" },
+    { "key": "quality_decay_curve", "label": "质量衰减曲线", "type": "series", "unit": "%" },
+    { "key": "remaining_shelf_life", "label": "剩余货架期", "type": "scalar", "unit": "天" },
+    { "key": "risk_points", "label": "断链风险点识别", "type": "heatmap" },
+    { "key": "damage_rate", "label": "货损率", "type": "scalar", "unit": "%" },
+    { "key": "plan_compare", "label": "不同温控方案对比", "type": "compare" }
+  ],
+  "constraints": [
+    { "name": "shelf_life_ok", "expression": "initial_shelf_life >= 5", "message": "到达时剩余货架期需大于规定天数" },
+    { "name": "temp_range_ok", "expression": "temp_min < temp_max", "message": "最适温度区间需合法（T_min < T_max）" }
+  ]
+}

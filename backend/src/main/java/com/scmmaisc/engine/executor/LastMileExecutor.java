@@ -37,9 +37,11 @@ public class LastMileExecutor implements ScenarioExecutor {
         Double turnover = doubleParam(params, "locker_turnover", 1, 5, errors);
         Double radius = doubleParam(params, "station_radius", 300, 1000, errors);
         Double crowdPrice = doubleParam(params, "crowd_unit_price", 3, 10, errors);
-        Map<String, Double> pref = distParam(params, "consumer_preference",
-                Map.of("home", new double[]{0, 1}, "locker", new double[]{0, 1},
-                        "station", new double[]{0, 1}, "crowd", new double[]{0, 1}), errors);
+        Map<String, Double> pref = params.containsKey("consumer_preference")
+                ? distParam(params, "consumer_preference",
+                        Map.of("home", new double[]{0, 1}, "locker", new double[]{0, 1},
+                                "station", new double[]{0, 1}, "crowd", new double[]{0, 1}), errors)
+                : null; // 可选分布：缺省时由 run() 使用内置偏好
         if (errors.isEmpty() && parcels != null && homeSuccess != null && slots != null
                 && turnover != null && radius != null && crowdPrice != null && pref != null) {
             double sum = pref.values().stream().mapToDouble(Double::doubleValue).sum();
@@ -72,6 +74,9 @@ public class LastMileExecutor implements ScenarioExecutor {
         double crowdPrice = ((Number) params.get("crowd_unit_price")).doubleValue();
         @SuppressWarnings("unchecked")
         Map<String, Object> prefRaw = (Map<String, Object>) params.get("consumer_preference");
+        if (prefRaw == null) {
+            prefRaw = Map.of("home", 0.4, "locker", 0.3, "station", 0.2, "crowd", 0.1); // 缺省偏好
+        }
         Map<String, Double> pref = new LinkedHashMap<>();
         for (Map.Entry<String, Object> e : prefRaw.entrySet()) {
             pref.put(e.getKey(), ((Number) e.getValue()).doubleValue());

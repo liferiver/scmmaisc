@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH4", "name": "第四章 电子商务环境下的物流系统", "sortNo": 4 },
+  "moduleId": "CH4-004",
+  "name": "京东自建物流+第三方物流混合模式仿真",
+  "engineKey": "jd-mode",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "自建仓配一体、211限时达、混合模式(自营核心+第三方边缘)、覆盖边界优化",
+  "description": "设定服务区域(城市/品类) → 京东自营仓配覆盖区域:自建仓库+自营配送→211时效 → 非自营覆盖区域:第三方物流合作→时效延长 → 成本-时效-覆盖三维权衡 → 最优自营/外包边界；讨论自营模式在低线城市的挑战",
+  "deps": ["CH1-004", "CH1-008"],
+  "params": [
+    { "key": "city_count", "label": "覆盖城市数", "type": "int", "unit": "个", "min": 10, "max": 300, "step": 10, "default": 100, "description": "自营配送覆盖" },
+    { "key": "warehouse_count", "label": "自营仓库数", "type": "int", "unit": "个", "min": 3, "max": 50, "step": 1, "default": 15, "description": "区域仓+前置仓" },
+    { "key": "station_count", "label": "自营配送站数", "type": "int", "unit": "个", "min": 20, "max": 2000, "step": 20, "default": 300, "description": "末端站点" },
+    { "key": "self_invest", "label": "自营固定投资(仓+车+人)", "type": "float", "unit": "万元", "min": 5000, "max": 500000, "step": 5000, "default": 100000, "description": "5000万-50亿重资产投入" },
+    { "key": "self_unit_cost", "label": "自营单均配送成本", "type": "float", "unit": "元", "min": 5, "max": 20, "step": 0.5, "default": 8, "description": "自营成本" },
+    { "key": "pl_unit_cost", "label": "3PL单均成本", "type": "float", "unit": "元", "min": 4, "max": 15, "step": 0.5, "default": 6, "description": "外包成本" },
+    { "key": "delivery_standard", "label": "时效要求", "type": "enum", "default": "211", "options": [ { "label": "211限时达", "value": "211" }, { "label": "次日达", "value": "next_day" }, { "label": "隔日达", "value": "two_day" } ], "description": "服务标准" }
+  ],
+  "outputs": [
+    { "key": "coverage_cost_curve", "label": "总成本-自营覆盖率曲线", "type": "series", "unit": "万元" },
+    { "key": "ontime_rate", "label": "时效达标率", "type": "gauge", "unit": "%" },
+    { "key": "optimal_boundary", "label": "最优自营覆盖边界", "type": "scalar", "unit": "城市" },
+    { "key": "self_vs_pl", "label": "自营vs外包成本对比", "type": "compare", "unit": "元/单" }
+  ],
+  "constraints": [
+    { "name": "coverage_ok", "expression": "warehouse_count * 20 >= city_count", "message": "核心城市必须自营覆盖（仓库数×20 需 ≥ 覆盖城市数）" }
+  ]
+}

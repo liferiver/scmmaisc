@@ -1,0 +1,32 @@
+{
+  "chapter": { "code": "CH11", "name": "第十一章 现代物流与供应链发展", "sortNo": 11 },
+  "moduleId": "CH11-009",
+  "name": "物联网(IoT)与AI在物流中的应用仿真",
+  "engineKey": "iot-ai",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": false,
+  "concept": "IoT传感器网络、数字孪生(Digital Twin)、AI预测性维护、智能调度",
+  "description": "物流资产IoT化：车辆(GPS+油耗传感器+故障诊断→AI预测性维护)、仓库(温湿度+光照+能耗监测→AI节能调控)、包裹(RFID/BLE+加速度传感器→全链路可视化+异常检测)；数字孪生(虚拟镜像)→实时模拟+what-if分析；AI决策：异常包裹自动拦截/最优路径重规划/设备维护排程；先管理传统物流再逐步开启IoT/AI功能量化效率提升",
+  "deps": ["CH3-001", "CH3-002", "CH3-005"],
+  "params": [
+    { "key": "iot_coverage", "label": "IoT设备部署密度", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.6, "description": "资产数字化覆盖" },
+    { "key": "sensor_interval", "label": "传感器数据采集频率", "type": "float", "unit": "秒", "min": 1, "max": 300, "step": 5, "default": 60, "description": "数据粒度" },
+    { "key": "pm_accuracy", "label": "预测性维护模型准确率", "type": "float", "min": 0.7, "max": 0.95, "step": 0.05, "default": 0.85, "description": "AI预测水平" },
+    { "key": "fault_rate_base", "label": "设备故障率(无预测维护)", "type": "float", "min": 0.01, "max": 0.05, "step": 0.005, "default": 0.03, "description": "基线" },
+    { "key": "fault_rate_pm", "label": "设备故障率(有预测维护)", "type": "float", "min": 0.002, "max": 0.01, "step": 0.001, "default": 0.005, "description": "改善后" },
+    { "key": "anomaly_accuracy", "label": "异常包裹检测准确率", "type": "float", "min": 0.8, "max": 0.99, "step": 0.01, "default": 0.95, "description": "AI检测" },
+    { "key": "twin_sync_delay", "label": "数字孪生同步延迟", "type": "float", "unit": "秒", "min": 1, "max": 60, "step": 1, "default": 10, "description": "虚实同步间隔" },
+    { "key": "ai_false_rate", "label": "AI决策误报/漏报率", "type": "float", "min": 0.01, "max": 0.1, "step": 0.01, "default": 0.03, "description": "AI可靠性" }
+  ],
+  "outputs": [
+    { "key": "downtime_compare", "label": "设备停机时间对比", "type": "compare", "unit": "小时" },
+    { "key": "maintenance_saving", "label": "维护成本节省", "type": "scalar", "unit": "元" },
+    { "key": "anomaly_detection_rate", "label": "异常检出率", "type": "gauge", "unit": "%" },
+    { "key": "visibility_rate", "label": "端到端可视化率", "type": "gauge", "unit": "%" },
+    { "key": "iot_roi", "label": "IoT投资ROI", "type": "scalar", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "pm_effective", "expression": "fault_rate_pm < fault_rate_base", "message": "预测性维护应降低设备故障率（AI 预测水平需优于基线）" }
+  ]
+}

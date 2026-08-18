@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH10", "name": "第十章 全球供应链", "sortNo": 10 },
+  "moduleId": "CH10-002",
+  "name": "全球供应链集中化vs分散化管理仿真",
+  "engineKey": "central-vs-decentral",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "集中化管理(Centralized)、分散化管理(Decentralized)、混合模式",
+  "description": "同一跨国企业分别采用三种管理模式：集中化(总部统一决策→标准化高效率但本地响应差)、分散化(各地区自主决策→灵活适应但缺乏协同效应)、混合(战略集中+运营分散如采购集中/销售分散)；多市场多产品场景下比较总利润/响应速度/协同效应；体验总部一管就死一放就乱的经典困境",
+  "deps": ["CH10-001"],
+  "params": [
+    { "key": "region_count", "label": "区域市场数", "type": "int", "unit": "个", "min": 3, "max": 7, "step": 1, "default": 4, "description": "如亚太/欧洲/北美/拉美" },
+    { "key": "demand_difference", "label": "各市场需求差异度", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.6, "description": "差异大→分散管理优势" },
+    { "key": "synergy_potential", "label": "采购协同潜力", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.7, "description": "协同大→集中管理优势" },
+    { "key": "info_efficiency", "label": "信息传递效率", "type": "float", "min": 0.5, "max": 1.0, "step": 0.05, "default": 0.8, "description": "总部获取地区信息的效率" },
+    { "key": "local_knowledge", "label": "各区域本地知识需求", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.5, "description": "需要本地知识程度" },
+    { "key": "management_mode", "label": "管理模式", "type": "enum", "options": [ { "label": "集中化", "value": "centralized" }, { "label": "分散化", "value": "decentralized" }, { "label": "混合", "value": "hybrid" } ], "default": "hybrid", "description": "决策权分配" }
+  ],
+  "outputs": [
+    { "key": "total_profit", "label": "总利润", "type": "scalar", "unit": "元" },
+    { "key": "synergy_saving", "label": "采购协同节省", "type": "scalar", "unit": "元" },
+    { "key": "response_compare", "label": "本地市场响应速度", "type": "compare" },
+    { "key": "complexity_cost", "label": "管理复杂度成本", "type": "scalar", "unit": "元" },
+    { "key": "best_mode", "label": "最优管理模式", "type": "scalar" }
+  ],
+  "constraints": [
+    { "name": "regions_ok", "expression": "region_count >= 3", "message": "至少 3 个区域市场才能体现管理模式差异；需满足各国合规要求" }
+  ]
+}

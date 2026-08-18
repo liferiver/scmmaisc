@@ -1,0 +1,35 @@
+{
+  "chapter": { "code": "CH1", "name": "第一章 概论", "sortNo": 1 },
+  "moduleId": "CH1-001",
+  "name": "华为供应商\"铁三角\"管理仿真",
+  "engineKey": "supplier-triangle",
+  "difficulty": "intro",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "供应商选择-评价-认证三段式管理、物料专家团(CEG)、六维评价体系、供应商分级",
+  "description": "供应商筛选 → CEG评估/招标/比价 → 六维打分(技术/质量/响应/交付/成本/环保) → 排名分级 → 问卷评估 → 样品测试 → 现场审核 → 认证通过/淘汰；低于认证阈值的供应商淘汰，最终输出合格供应商名单与等级分布",
+  "deps": [],
+  "params": [
+    { "key": "candidate_count", "label": "候选供应商数量", "type": "int", "unit": "家", "min": 5, "max": 50, "step": 1, "default": 10, "description": "初始供应商池大小" },
+    { "key": "weight_tech", "label": "技术维度权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.2, "description": "六维权重之一（权重和=1，V2 文档 float[6] 转写）" },
+    { "key": "weight_quality", "label": "质量维度权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.2, "description": "六维权重之一（权重和=1，V2 文档 float[6] 转写）" },
+    { "key": "weight_response", "label": "响应维度权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.15, "description": "六维权重之一（权重和=1，V2 文档 float[6] 转写）" },
+    { "key": "weight_delivery", "label": "交付维度权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.15, "description": "六维权重之一（权重和=1，V2 文档 float[6] 转写）" },
+    { "key": "weight_cost", "label": "成本维度权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.2, "description": "六维权重之一（权重和=1，V2 文档 float[6] 转写）" },
+    { "key": "weight_environment", "label": "环保维度权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.1, "description": "六维权重之一（权重和=1，V2 文档 float[6] 转写）" },
+    { "key": "supplier_scores", "label": "各供应商维度得分", "type": "matrix", "description": "每行一个候选供应商：技术/质量/响应/交付/成本/环保 六列得分（0-100，V2 文档 float[] 转写为矩阵）" },
+    { "key": "pass_threshold", "label": "认证标准阈值", "type": "float", "unit": "分", "min": 60, "max": 90, "step": 1, "default": 75, "description": "综合得分低于阈值淘汰" },
+    { "key": "sample_pass_rate", "label": "样品合格率", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.85, "description": "样品测试通过概率" },
+    { "key": "audit_items", "label": "现场审核项数", "type": "int", "unit": "项", "min": 10, "max": 50, "step": 1, "default": 25, "description": "审核清单长度，影响审核耗时" }
+  ],
+  "outputs": [
+    { "key": "qualified_suppliers", "label": "合格供应商名单", "type": "compare" },
+    { "key": "grade_distribution", "label": "供应商等级分布", "type": "compare" },
+    { "key": "pass_rate", "label": "认证通过率", "type": "scalar", "unit": "%" },
+    { "key": "score_radar", "label": "各维度得分雷达图", "type": "compare" }
+  ],
+  "constraints": [
+    { "name": "weight_sum", "expression": "weight_tech + weight_quality + weight_response + weight_delivery + weight_cost + weight_environment == 1", "message": "评估维度权重和必须等于 1" },
+    { "name": "min_two_qualified", "expression": "qualified_count >= 2", "message": "至少保留 2 家合格供应商" }
+  ]
+}

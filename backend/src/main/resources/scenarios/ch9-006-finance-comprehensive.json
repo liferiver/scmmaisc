@@ -1,0 +1,35 @@
+{
+  "chapter": { "code": "CH9", "name": "第九章 供应链金融", "sortNo": 9 },
+  "moduleId": "CH9-006",
+  "name": "供应链金融综合运营仿真",
+  "engineKey": "finance-comprehensive",
+  "difficulty": "comprehensive",
+  "classHours": 3,
+  "isRolePlay": true,
+  "concept": "供应链金融生态、多方博弈、全流程管理",
+  "description": "完整供应链金融生态：银行+核心企业+多个上下游中小企业+监管方；多周期运营：企业融资申请→银行审批→放款→风险监控→回收；期间注入市场/信用/操作风险事件→平衡收益(利息收入)与风险(不良贷款)；适合分组比赛（哪家银行在控制风险前提下利润最高）",
+  "deps": ["CH9-001", "CH9-002", "CH9-003", "CH9-004", "CH9-005"],
+  "params": [
+    { "key": "sme_count", "label": "中小企业数量", "type": "int", "unit": "家", "min": 10, "max": 50, "step": 5, "default": 30, "description": "融资需求方" },
+    { "key": "core_count", "label": "核心企业数量", "type": "int", "unit": "家", "min": 1, "max": 3, "step": 1, "default": 1, "description": "信用锚点" },
+    { "key": "receivable_share", "label": "应收业务占比", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.4, "description": "业务类型组合，和=1" },
+    { "key": "inventory_share", "label": "存货业务占比", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.3, "description": "业务类型组合，和=1" },
+    { "key": "prepayment_share", "label": "预付业务占比", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.3, "description": "业务类型组合，和=1" },
+    { "key": "bank_capital", "label": "银行资本金", "type": "float", "unit": "亿元", "min": 1, "max": 10, "step": 0.5, "default": 5, "description": "风险资产约束" },
+    { "key": "npl_tolerance", "label": "不良容忍率", "type": "float", "min": 0.02, "max": 0.05, "step": 0.005, "default": 0.03, "description": "银行风控目标" },
+    { "key": "cycle_phase", "label": "经济周期阶段", "type": "enum", "options": [ { "label": "扩张", "value": "expansion" }, { "label": "平稳", "value": "stable" }, { "label": "衰退", "value": "recession" } ], "default": "stable", "description": "宏观环境" },
+    { "key": "sim_quarters", "label": "模拟周期数", "type": "int", "unit": "季度", "min": 4, "max": 20, "step": 2, "default": 12, "description": "多周期运营时长（平台补充参数）" }
+  ],
+  "outputs": [
+    { "key": "net_interest_income", "label": "净利息收入", "type": "series", "unit": "元" },
+    { "key": "npl_ratio", "label": "不良贷款率", "type": "series", "unit": "%" },
+    { "key": "roe", "label": "ROE", "type": "scalar", "unit": "%" },
+    { "key": "capital_adequacy", "label": "资本充足率", "type": "gauge", "unit": "%" },
+    { "key": "sme_satisfaction", "label": "中小企业融资满足率", "type": "scalar", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "shares_ok", "expression": "receivable_share + inventory_share + prepayment_share <= 1", "message": "应收/存货/预付业务占比之和需等于 1" },
+    { "name": "npl_ok", "expression": "npl_tolerance < 0.05", "message": "不良贷款率需<5%" },
+    { "name": "capital_ok", "expression": "bank_capital >= 1", "message": "资本充足率需>8%（受资本金约束）" }
+  ]
+}

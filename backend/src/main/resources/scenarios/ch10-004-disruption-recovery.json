@@ -1,0 +1,32 @@
+{
+  "chapter": { "code": "CH10", "name": "第十章 全球供应链", "sortNo": 10 },
+  "moduleId": "CH10-004",
+  "name": "全球供应链中断恢复仿真",
+  "engineKey": "disruption-recovery",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "供应链韧性、中断响应、恢复时间、应急预案、业务连续性管理(BCM)",
+  "description": "供应链正常运行→突发中断事件(某国工厂因疫情关闭/苏伊士运河堵塞/港口罢工)→危机管理启动：评估影响范围→激活备选供应商→调用安全库存→重新分配产能→优先级排序(哪些客户/订单优先保障)→调整物流路线→逐步恢复记录恢复时间和成本→事后复盘；适合团队竞赛（哪组维护最高客户服务水平、最小损失）",
+  "deps": ["CH10-003"],
+  "params": [
+    { "key": "disruption_node", "label": "中断节点", "type": "enum", "options": [ { "label": "上海工厂", "value": "shanghai_factory" }, { "label": "苏伊士运河", "value": "suez_canal" }, { "label": "港口罢工", "value": "port_strike" } ], "default": "shanghai_factory", "description": "中断发生位置" },
+    { "key": "disruption_duration_dist", "label": "中断持续天数分布", "type": "dist", "default": { "distType": "lognormal", "mean": 20, "sigma": 10 }, "description": "不确定的中断时长" },
+    { "key": "backup_switch_time", "label": "备选供应商启用时间", "type": "float", "unit": "天", "min": 5, "max": 30, "step": 1, "default": 10, "description": "切换时间" },
+    { "key": "backup_cost_premium", "label": "备选供应商成本上浮", "type": "float", "unit": "%", "min": 10, "max": 50, "step": 5, "default": 20, "description": "紧急采购溢价" },
+    { "key": "safety_stock_days", "label": "安全库存覆盖天数", "type": "float", "unit": "天", "min": 7, "max": 60, "step": 1, "default": 30, "description": "缓冲" },
+    { "key": "affected_customers", "label": "受影响客户数", "type": "int", "unit": "个", "min": 10, "max": 500, "step": 10, "default": 100, "description": "中断波及范围" },
+    { "key": "capacity_flexibility", "label": "产能重新分配灵活度", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.5, "description": "其他工厂承接能力" },
+    { "key": "penalty_daily_ratio", "label": "违约罚金比例", "type": "float", "min": 0.001, "max": 0.05, "step": 0.001, "default": 0.01, "description": "日销售额×系数，延迟交付罚款" }
+  ],
+  "outputs": [
+    { "key": "recovery_timeline", "label": "中断恢复时间", "type": "series", "unit": "天" },
+    { "key": "lost_profit", "label": "中断期间损失利润", "type": "scalar", "unit": "元" },
+    { "key": "customer_loss", "label": "客户流失数", "type": "scalar", "unit": "个" },
+    { "key": "activation_gantt", "label": "备选方案激活-恢复甘特图", "type": "series" },
+    { "key": "resilience_roi", "label": "韧性投资ROI", "type": "scalar", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "key_customer_ok", "expression": "safety_stock_days >= 7", "message": "关键客户必须 3 天内恢复供应（需足够安全库存缓冲）" }
+  ]
+}

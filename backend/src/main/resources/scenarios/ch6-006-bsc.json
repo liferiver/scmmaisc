@@ -1,0 +1,32 @@
+{
+  "chapter": { "code": "CH6", "name": "第六章 供应链管理", "sortNo": 6 },
+  "moduleId": "CH6-006",
+  "name": "BSC平衡计分卡供应链绩效仿真",
+  "engineKey": "bsc",
+  "difficulty": "basic",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "BSC四维(财务/客户/内部流程/学习成长)、战略地图、KPI因果链",
+  "description": "设定供应链战略目标 → 分解为 BSC 四维度 KPI(财务:利润率/ROA/现金流/物流成本率；客户:OTIF/满意度/NPS；内部流程:库存周转/产能利用率/订单周期；学习成长:数字化覆盖率/培训时数/创新项目) → 设定目标+权重 → 周期性数据采集(6-12期) → 计算 BSC 综合得分 → 因果链分析；讨论领先指标驱动滞后指标的因果逻辑",
+  "deps": ["CH2-008"],
+  "params": [
+    { "key": "weight_finance", "label": "BSC权重-财务", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.3, "description": "BSC 四维权重 float[4] 和=1 转写" },
+    { "key": "weight_customer", "label": "BSC权重-客户", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.3, "description": "BSC 四维权重 float[4] 和=1 转写" },
+    { "key": "weight_process", "label": "BSC权重-内部流程", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.25, "description": "BSC 四维权重 float[4] 和=1 转写" },
+    { "key": "weight_growth", "label": "BSC权重-学习成长", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.15, "description": "BSC 四维权重 float[4] 和=1 转写" },
+    { "key": "kpi_targets", "label": "各KPI目标值", "type": "timeseries", "description": "每个 KPI 的年度目标值（财务4+客户3+流程3+成长3，共 13 项）" },
+    { "key": "periods", "label": "考核周期数", "type": "int", "unit": "期", "min": 6, "max": 12, "step": 1, "default": 8, "description": "月度/季度" },
+    { "key": "actual_values", "label": "各期实际值", "type": "timeseries", "description": "按周期实际值，或由仿真生成" },
+    { "key": "causal_matrix", "label": "KPI因果链强度", "type": "matrix", "description": "学习→流程→客户→财务链强度(0-1)" }
+  ],
+  "outputs": [
+    { "key": "bsc_trend", "label": "BSC综合得分趋势", "type": "series" },
+    { "key": "dimension_dashboard", "label": "四维达成率仪表盘", "type": "gauge", "unit": "%" },
+    { "key": "strategy_map", "label": "战略地图因果链", "type": "topo" },
+    { "key": "lead_lag", "label": "领先vs滞后指标分析", "type": "compare" }
+  ],
+  "constraints": [
+    { "name": "weight_sum", "expression": "weight_finance + weight_customer + weight_process + weight_growth == 1", "message": "BSC 四维权重之和需等于 1" },
+    { "name": "dimension_ok", "expression": "periods >= 6", "message": "KPI 需覆盖四个维度（每个维度不少于 2 个指标），考核周期数需 ≥ 6 期" }
+  ]
+}

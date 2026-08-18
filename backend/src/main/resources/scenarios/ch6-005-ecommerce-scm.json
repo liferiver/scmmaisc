@@ -1,0 +1,29 @@
+{
+  "chapter": { "code": "CH6", "name": "第六章 供应链管理", "sortNo": 6 },
+  "moduleId": "CH6-005",
+  "name": "电子商务环境下的SCM战略仿真",
+  "engineKey": "ecommerce-scm",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "电商SCM、全渠道、数字化供应链、需求驱动、快速响应",
+  "description": "传统SCM vs 电商SCM → 电商环境特征(需求波动大/长尾SKU/高退货率/时效敏感) → 策略调整(推拉结合/前置仓布局/智能补货/弹性产能) → 运行对比(传统 vs 电商优化策略)；讨论为什么电商库存管理比传统零售更难",
+  "deps": ["CH6-004"],
+  "params": [
+    { "key": "sku_count", "label": "SKU数量", "type": "int", "unit": "个", "min": 100, "max": 100000, "step": 100, "default": 5000, "description": "长尾程度" },
+    { "key": "demand_cv", "label": "需求波动系数(CV)", "type": "float", "min": 0.2, "max": 1.5, "step": 0.05, "default": 0.6, "description": "电商波动>传统" },
+    { "key": "return_rate", "label": "退货率", "type": "float", "min": 0.05, "max": 0.3, "step": 0.01, "default": 0.15, "description": "电商退货率更高" },
+    { "key": "front_warehouse_count", "label": "前置仓数量", "type": "int", "unit": "个", "min": 1, "max": 20, "step": 1, "default": 5, "description": "电商常用策略" },
+    { "key": "replenish_frequency", "label": "补货频率", "type": "int", "unit": "次/周", "min": 1, "max": 7, "step": 1, "default": 3, "description": "电商高频补货" },
+    { "key": "replenish_algorithm", "label": "智能补货算法", "type": "enum", "default": "ml_forecast", "options": [ { "label": "min-max", "value": "min_max" }, { "label": "移动平均预测", "value": "moving_average" }, { "label": "ML预测", "value": "ml_forecast" } ], "description": "补货策略" }
+  ],
+  "outputs": [
+    { "key": "stockout_compare", "label": "缺货率对比(传统vs电商策略)", "type": "compare", "unit": "%" },
+    { "key": "response_time", "label": "订单响应时间", "type": "series", "unit": "小时" },
+    { "key": "inventory_turnover", "label": "库存周转率", "type": "scalar", "unit": "次/年" },
+    { "key": "longtail_fulfillment", "label": "长尾SKU满足率", "type": "scalar", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "sla_ok", "expression": "front_warehouse_count >= 1", "message": "需满足平台 SLA：至少配置 1 个前置仓以保障时效" }
+  ]
+}

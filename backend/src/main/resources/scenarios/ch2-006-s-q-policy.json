@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH2", "name": "第二章 物流系统控制", "sortNo": 2 },
+  "moduleId": "CH2-006",
+  "name": "随机需求库存(s,Q)策略仿真",
+  "engineKey": "s-q-policy",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "(s,Q)连续盘点策略、安全库存 SS=zα·σ·√L、服务水平 CSL/fill rate、正态/泊松需求",
+  "description": "需求随机生成(正态/泊松分布) → 逐日库存消耗 → 库存≤再订货点s → 触发订货Q单位 → 提前期L天后到货 → 统计缺货次数/缺货量 → 计算实际服务水平；σ 或 L 增大时安全库存自动增大",
+  "deps": ["CH2-003"],
+  "params": [
+    { "key": "demand_dist", "label": "日需求分布", "type": "dist", "default": { "distType": "normal", "mean": 100, "sigma": 10 }, "description": "dist{normal,μ,σ} 或 dist{poisson,λ}" },
+    { "key": "order_qty", "label": "订货批量Q", "type": "int", "unit": "单位", "min": 50, "max": 5000, "step": 10, "default": 1000, "description": "每次订货量" },
+    { "key": "lead_time", "label": "提前期L", "type": "float", "unit": "天", "min": 1, "max": 14, "step": 1, "default": 7, "description": "订货到货延迟" },
+    { "key": "service_level", "label": "目标服务水平α", "type": "float", "min": 0.90, "max": 0.999, "step": 0.005, "default": 0.95, "description": "CSL 周期服务水平，zα 由标准正态分位数表取值" },
+    { "key": "holding_cost", "label": "单位持有成本h", "type": "float", "unit": "元/单位·年", "min": 1, "max": 500, "step": 1, "default": 10, "description": "持有成本" },
+    { "key": "stockout_cost", "label": "单位缺货成本p", "type": "float", "unit": "元/单位", "min": 10, "max": 5000, "step": 10, "default": 50, "description": "缺货成本" }
+  ],
+  "outputs": [
+    { "key": "reorder_point", "label": "最优再订货点s", "type": "scalar", "unit": "单位" },
+    { "key": "safety_stock", "label": "安全库存量", "type": "scalar", "unit": "单位" },
+    { "key": "actual_csl", "label": "实际CSL", "type": "gauge", "unit": "%" },
+    { "key": "fill_rate", "label": "实际fill rate", "type": "gauge", "unit": "%" },
+    { "key": "total_cost", "label": "年总成本", "type": "scalar", "unit": "元" }
+  ],
+  "constraints": [
+    { "name": "s_ge_zero", "expression": "reorder_point >= 0", "message": "再订货点不得为负" },
+    { "name": "csl_ok", "expression": "actual_csl >= service_level", "message": "实际周期服务水平需达到目标" }
+  ]
+}

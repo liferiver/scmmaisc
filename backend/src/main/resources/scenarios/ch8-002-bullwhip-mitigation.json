@@ -1,0 +1,34 @@
+{
+  "chapter": { "code": "CH8", "name": "第八章 供应链协同", "sortNo": 8 },
+  "moduleId": "CH8-002",
+  "name": "牛鞭效应抑制策略量化仿真",
+  "engineKey": "bullwhip-mitigation",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "牛鞭效应六因(需求预测更新/批量订货/价格波动/短缺博弈/提前期/信息不对称)、四策(信息共享/减少环节/缩短提前期/VMI)",
+  "description": "在啤酒游戏基础上逐一引入对策做对照实验：A 基线(传统模式) → B +信息共享(POS 数据透明) → C +缩短提前期(减半) → D +减少批量(小批量高频) → E +VMI(供应商管库存) → F 综合所有对策；量化每种对策对牛鞭效应指数(BE)的抑制贡献，验证四策略有效性",
+  "deps": ["CH8-001"],
+  "params": [
+    { "key": "levels", "label": "供应链级数", "type": "int", "unit": "级", "min": 3, "max": 5, "step": 1, "default": 4, "description": "通常 4 级" },
+    { "key": "initial_demand", "label": "初始需求", "type": "int", "unit": "箱/周", "min": 1, "max": 20, "step": 1, "default": 4, "description": "稳定期需求" },
+    { "key": "demand_jump", "label": "需求跳变", "type": "int", "unit": "箱/周", "min": 1, "max": 100, "step": 1, "default": 8, "description": "第 6 轮起需求" },
+    { "key": "lead_time", "label": "提前期", "type": "int", "unit": "轮", "min": 1, "max": 3, "step": 1, "default": 2, "description": "每级订单-收货延迟" },
+    { "key": "holding_cost", "label": "单位库存持有成本", "type": "float", "unit": "元/箱·轮", "min": 0.5, "max": 2, "step": 0.1, "default": 0.5, "description": "持有成本" },
+    { "key": "stockout_cost", "label": "单位缺货成本", "type": "float", "unit": "元/箱·轮", "min": 2, "max": 10, "step": 0.5, "default": 2, "description": "缺货罚金" },
+    { "key": "total_rounds", "label": "总轮数", "type": "int", "unit": "轮", "min": 30, "max": 50, "step": 1, "default": 50, "description": "仿真时长" },
+    { "key": "info_share", "label": "信息共享开关", "type": "bool", "default": false, "description": "实验B：零售商 POS 数据对上游可见" },
+    { "key": "short_lead_time", "label": "缩短提前期开关", "type": "bool", "default": false, "description": "实验C：提前期减半" },
+    { "key": "small_batch", "label": "小批量高频开关", "type": "bool", "default": true, "description": "实验D：减少批量（默认开启以保证至少一种对策生效）" },
+    { "key": "vmi", "label": "VMI开关", "type": "bool", "default": false, "description": "实验E：供应商管理库存" }
+  ],
+  "outputs": [
+    { "key": "be_compare", "label": "各策略BE抑制效果对比", "type": "compare" },
+    { "key": "cost_compare", "label": "总成本对比(各对策)", "type": "compare", "unit": "元" },
+    { "key": "contribution_analysis", "label": "对策贡献分析(降低BE%)", "type": "compare", "unit": "%" },
+    { "key": "info_share_roi", "label": "信息共享ROI", "type": "scalar", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "be_reduced", "expression": "info_share or short_lead_time or small_batch or vmi", "message": "至少启用一种对策以观察 BE 抑制效果（建议逐一实验再综合）" }
+  ]
+}

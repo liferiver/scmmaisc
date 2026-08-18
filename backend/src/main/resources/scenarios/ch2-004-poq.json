@@ -1,0 +1,29 @@
+{
+  "chapter": { "code": "CH2", "name": "第二章 物流系统控制", "sortNo": 2 },
+  "moduleId": "CH2-004",
+  "name": "非瞬时补货(POQ)模型仿真",
+  "engineKey": "poq",
+  "difficulty": "intro",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "非瞬时补货、生产速率p、需求速率d(p>d)、最大库存 Imax=Q(1-d/p)、生产周期与消耗周期",
+  "description": "启动生产(速率p) → 边生产边消耗(净增长速率p-d) → 生产结束(达到 Imax) → 纯消耗阶段(速率d) → 库存归零 → 下一轮生产启动；年需求按 d×365 折算，与 EOQ 对比自产/外购差异",
+  "deps": ["CH2-003"],
+  "params": [
+    { "key": "daily_demand", "label": "日需求率d", "type": "float", "unit": "单位/天", "min": 10, "max": 1000, "step": 5, "default": 100, "description": "需求速率" },
+    { "key": "production_rate", "label": "日生产率p", "type": "float", "unit": "单位/天", "min": 10, "max": 2000, "step": 5, "default": 200, "description": "生产速率，必须大于 d" },
+    { "key": "setup_cost", "label": "生产准备成本", "type": "float", "unit": "元/次", "min": 10, "max": 5000, "step": 10, "default": 100, "description": "类比订货成本" },
+    { "key": "holding_cost", "label": "单位年持有成本", "type": "float", "unit": "元/单位·年", "min": 1, "max": 500, "step": 1, "default": 2, "description": "持有成本" }
+  ],
+  "outputs": [
+    { "key": "q_star", "label": "最优生产批量", "type": "scalar", "unit": "单位" },
+    { "key": "imax", "label": "最大库存Imax", "type": "scalar", "unit": "单位" },
+    { "key": "total_cost", "label": "年总成本", "type": "scalar", "unit": "元" },
+    { "key": "production_runs", "label": "年生产批次", "type": "scalar", "unit": "批" },
+    { "key": "cycle_share", "label": "生产/消耗周期占比", "type": "gauge", "unit": "%" },
+    { "key": "cost_vs_eoq", "label": "年总成本vs EOQ对比", "type": "compare", "unit": "元" }
+  ],
+  "constraints": [
+    { "name": "p_gt_d", "expression": "production_rate > daily_demand", "message": "生产率 p 必须大于需求率 d" }
+  ]
+}

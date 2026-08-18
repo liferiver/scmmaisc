@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH3", "name": "第三章 物流技术与信息系统", "sortNo": 3 },
+  "moduleId": "CH3-002",
+  "name": "GPS/BDS/GIS/LBS车辆定位与路径规划仿真",
+  "engineKey": "gps-location",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "GPS/BDS卫星定位、GIS地理信息系统、LBS位置服务、实时路径优化、电子围栏",
+  "description": "车辆位置采集(GPS/BDS每N秒上报) → GIS地图匹配 → 实时路况融合(拥堵/封路) → 动态路径重规划 → LBS围栏预警(偏离路线/超速/异常停留) → 可视化监控大屏；模拟早高峰路况变化观察系统实时调整路线",
+  "deps": [],
+  "params": [
+    { "key": "positioning_accuracy", "label": "定位精度", "type": "float", "unit": "m", "min": 1, "max": 30, "step": 1, "default": 10, "description": "BDS 可到 1m，GPS 5-10m" },
+    { "key": "report_interval", "label": "位置上报频率", "type": "float", "unit": "秒", "min": 1, "max": 60, "step": 1, "default": 5, "description": "频率↑精度↑但流量↑" },
+    { "key": "vehicle_count", "label": "车辆数", "type": "int", "unit": "辆", "min": 10, "max": 500, "step": 10, "default": 100, "description": "监控车队规模" },
+    { "key": "delivery_points", "label": "配送点数量", "type": "int", "unit": "个", "min": 20, "max": 200, "step": 10, "default": 80, "description": "每日配送点" },
+    { "key": "traffic_update_interval", "label": "实时路况更新频率", "type": "float", "unit": "秒", "min": 30, "max": 300, "step": 10, "default": 60, "description": "路况刷新间隔" },
+    { "key": "fence_radius", "label": "电子围栏半径", "type": "float", "unit": "m", "min": 100, "max": 2000, "step": 50, "default": 500, "description": "偏离预警阈值" }
+  ],
+  "outputs": [
+    { "key": "deviation_rate", "label": "轨迹偏离率", "type": "scalar", "unit": "%" },
+    { "key": "saved_mileage", "label": "路径优化节省里程", "type": "scalar", "unit": "km" },
+    { "key": "position_heatmap", "label": "实时位置地图", "type": "heatmap" },
+    { "key": "fence_alerts", "label": "围栏报警次数", "type": "series", "unit": "次" }
+  ],
+  "constraints": [
+    { "name": "accuracy_ok", "expression": "positioning_accuracy < 15", "message": "市内定位精度需小于 15m" },
+    { "name": "delay_ok", "expression": "report_interval <= 5", "message": "位置更新延迟需小于 5 秒" }
+  ]
+}

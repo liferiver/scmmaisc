@@ -39,10 +39,14 @@ public class CrossBorderExecutor implements ScenarioExecutor {
         List<String> errors = new ArrayList<>();
         String channel = enumParam(params, "trade_channel", CHANNELS, errors);
         String mode = enumParam(params, "transport_mode", TRANSPORT_MODES, errors);
-        Map<String, Double> exportCl = distParam(params, "export_clearance_time",
-                Map.of("mean", new double[]{0.5, 7}, "sd", new double[]{0.1, 2}), errors);
-        Map<String, Double> importCl = distParam(params, "import_clearance_time",
-                Map.of("mean", new double[]{1, 14}, "sd", new double[]{0.2, 3}), errors);
+        Map<String, Double> exportCl = params.containsKey("export_clearance_time")
+                ? distParam(params, "export_clearance_time",
+                        Map.of("mean", new double[]{0.5, 7}, "sd", new double[]{0.1, 2}), errors)
+                : null; // 可选分布：缺省时由 run() 使用内置清关参数
+        Map<String, Double> importCl = params.containsKey("import_clearance_time")
+                ? distParam(params, "import_clearance_time",
+                        Map.of("mean", new double[]{1, 14}, "sd", new double[]{0.2, 3}), errors)
+                : null; // 可选分布：缺省时由 run() 使用内置清关参数
         Double inspection = doubleParam(params, "inspection_probability", 0.01, 0.10, errors);
         Double tariff = doubleParam(params, "tariff_rate", 0, 0.25, errors);
         String category = enumParam(params, "goods_category", CATEGORIES, errors);
@@ -67,8 +71,14 @@ public class CrossBorderExecutor implements ScenarioExecutor {
         String mode = String.valueOf(params.get("transport_mode"));
         @SuppressWarnings("unchecked")
         Map<String, Object> exportCl = (Map<String, Object>) params.get("export_clearance_time");
+        if (exportCl == null) {
+            exportCl = Map.of("mean", 1.0, "sd", 0.2); // 缺省：出口清关 1±0.2 天
+        }
         @SuppressWarnings("unchecked")
         Map<String, Object> importCl = (Map<String, Object>) params.get("import_clearance_time");
+        if (importCl == null) {
+            importCl = Map.of("mean", 2.0, "sd", 0.5); // 缺省：进口清关 2±0.5 天
+        }
         double inspection = ((Number) params.get("inspection_probability")).doubleValue();
         double tariff = ((Number) params.get("tariff_rate")).doubleValue();
         String category = String.valueOf(params.get("goods_category"));

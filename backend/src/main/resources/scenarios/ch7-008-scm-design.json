@@ -1,0 +1,28 @@
+{
+  "chapter": { "code": "CH7", "name": "第七章 供应链设计与构建", "sortNo": 7 },
+  "moduleId": "CH7-008",
+  "name": "供应链设计综合决策仿真(十步法)",
+  "engineKey": "scm-design",
+  "difficulty": "comprehensive",
+  "classHours": 3,
+  "isRolePlay": true,
+  "concept": "供应链设计十步骤、综合权衡、多目标决策",
+  "description": "综合运用 7.1-7.7 全部知识: ①识别市场机会 → ②定义客户服务目标 → ③设计供应链策略(推/拉/Lean/Agile) → ④网络结构设计 → ⑤设施选址 → ⑥运输策略 → ⑦库存策略 → ⑧信息系统设计 → ⑨组织设计 → ⑩绩效体系设计；作为第 7 章大作业，分 2-3 次课完成，各组做设计方案答辩",
+  "deps": ["CH7-001", "CH7-002", "CH7-003", "CH7-004", "CH7-005", "CH7-006", "CH7-007"],
+  "params": [
+    { "key": "customer_service_target", "label": "客户服务目标", "type": "float", "min": 0.9, "max": 0.999, "step": 0.001, "default": 0.97, "description": "定义客户服务目标(十步法第②步)" },
+    { "key": "total_budget", "label": "总预算", "type": "float", "unit": "万元", "min": 100, "max": 10000, "step": 100, "default": 2000, "description": "总预算约束" },
+    { "key": "supply_strategy", "label": "供应链策略", "type": "enum", "default": "push_pull", "options": [ { "label": "Push推动", "value": "push" }, { "label": "Pull拉动", "value": "pull" }, { "label": "推拉结合", "value": "push_pull" } ], "description": "第③步：推/拉/Lean/Agile 策略" },
+    { "key": "facility_count", "label": "设施数量", "type": "int", "unit": "个", "min": 1, "max": 50, "step": 1, "default": 10, "description": "第④⑤步：网络结构与设施选址" },
+    { "key": "info_system_level", "label": "信息系统水平", "type": "enum", "default": "integrated", "options": [ { "label": "基础", "value": "basic" }, { "label": "集成", "value": "integrated" }, { "label": "智慧", "value": "smart" } ], "description": "第⑧步：信息系统设计" }
+  ],
+  "outputs": [
+    { "key": "kpi_dashboard", "label": "综合KPI仪表盘", "type": "gauge", "unit": "%" },
+    { "key": "step_decisions", "label": "各步骤决策汇总", "type": "compare" },
+    { "key": "total_chain_cost", "label": "全链路成本", "type": "scalar", "unit": "万元" },
+    { "key": "risk_return", "label": "风险-收益分析", "type": "compare" }
+  ],
+  "constraints": [
+    { "name": "service_ok", "expression": "customer_service_target <= 0.999", "message": "需满足客户服务目标且不超总预算" }
+  ]
+}

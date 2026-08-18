@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH7", "name": "第七章 供应链设计与构建", "sortNo": 7 },
+  "moduleId": "CH7-007",
+  "name": "供应链模块化设计仿真",
+  "engineKey": "modularity",
+  "difficulty": "advanced",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "模块化设计、产品平台、通用件、延迟策略、风险汇聚效应",
+  "description": "产品族设计:模块化 vs 一体化设计 → 模块化(通用平台+可替换模块→少组件/多组合→降低库存/提高柔性) vs 一体化(每个产品独立组件→高库存/低柔性) → 给定需求不确定性 → 计算两种策略的库存成本/缺货率/响应速度；讨论汽车行业平台化战略(MQB/CMA)如何通过模块化降低成本",
+  "deps": ["CH7-002"],
+  "params": [
+    { "key": "variant_count", "label": "最终产品变体数", "type": "int", "unit": "个", "min": 10, "max": 100, "step": 5, "default": 30, "description": "面向客户的产品种类" },
+    { "key": "common_modules", "label": "模块化后通用组件数", "type": "int", "unit": "个", "min": 5, "max": 20, "step": 1, "default": 10, "description": "平台通用件" },
+    { "key": "dedicated_modules", "label": "模块化后专用模块数", "type": "int", "unit": "个", "min": 3, "max": 10, "step": 1, "default": 5, "description": "可变模块" },
+    { "key": "demand_cv", "label": "各变体需求波动CV", "type": "float", "min": 0.1, "max": 0.6, "step": 0.05, "default": 0.3, "description": "需求不确定性" },
+    { "key": "common_cost_premium", "label": "组件成本差异(专用vs通用)", "type": "float", "min": 0.05, "max": 0.2, "step": 0.01, "default": 0.1, "description": "通用件可能成本略高(5-20%)" },
+    { "key": "assembly_time_ratio", "label": "组装时间(模块化vs一体化)", "type": "float", "min": 0.5, "max": 0.8, "step": 0.05, "default": 0.65, "description": "模块化组装更快(50-80%)" }
+  ],
+  "outputs": [
+    { "key": "total_inventory", "label": "库存总水平", "type": "scalar", "unit": "件" },
+    { "key": "stockout_rate", "label": "缺货率", "type": "scalar", "unit": "%" },
+    { "key": "cost_compare", "label": "总成本对比", "type": "compare", "unit": "元" },
+    { "key": "time_to_market", "label": "新产品上市时间", "type": "scalar", "unit": "天" },
+    { "key": "risk_pooling", "label": "风险汇聚效应", "type": "scalar", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "interface_ok", "expression": "common_modules >= 5", "message": "模块接口需兼容（通用组件数需 ≥ 5 以形成平台效应）" }
+  ]
+}

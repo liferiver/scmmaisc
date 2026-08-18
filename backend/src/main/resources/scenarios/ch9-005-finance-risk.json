@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH9", "name": "第九章 供应链金融", "sortNo": 9 },
+  "moduleId": "CH9-005",
+  "name": "供应链金融风险识别与评估仿真",
+  "engineKey": "finance-risk",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "四类风险(法律/市场/信用/操作)、风险传染、风险矩阵、压力测试",
+  "description": "构建供应链金融业务组合(多种融资模式+多个客户)→风险事件库：法律(虚假贸易/应收账款重复质押)、市场(质押品价格暴跌/利率上升)、信用(核心企业信用降级/违约)、操作(内部欺诈/系统故障/监管疏忽)→风险事件发生评估已造成损失+潜在传染→压力测试(基准/不利/严重/极端)评估风险覆盖倍数；注入2014年钢贸重复质押事件分析风险传导链",
+  "deps": ["CH9-001", "CH9-002", "CH9-003", "CH9-004"],
+  "params": [
+    { "key": "portfolio_size", "label": "业务组合客户数", "type": "int", "unit": "户", "min": 5, "max": 50, "step": 5, "default": 20, "description": "多客户多模式风险暴露分布" },
+    { "key": "risk_matrix", "label": "风险事件概率矩阵", "type": "matrix", "description": "四类风险事件(法律/市场/信用/操作)历史或主观概率" },
+    { "key": "lgd", "label": "损失给定违约LGD", "type": "float", "min": 0.3, "max": 0.8, "step": 0.05, "default": 0.5, "description": "各业务类型的损失率" },
+    { "key": "default_correlation", "label": "违约相关性", "type": "float", "min": 0.1, "max": 0.6, "step": 0.05, "default": 0.3, "description": "风险传染强度" },
+    { "key": "stress_scenario", "label": "压力情景", "type": "enum", "options": [ { "label": "基准", "value": "baseline" }, { "label": "不利", "value": "adverse" }, { "label": "严重", "value": "severe" }, { "label": "极端", "value": "extreme" } ], "default": "adverse", "description": "四档压力级别" },
+    { "key": "risk_mitigation", "label": "风险缓释工具", "type": "enum", "options": [ { "label": "保证金", "value": "margin" }, { "label": "担保", "value": "guarantee" }, { "label": "保险", "value": "insurance" }, { "label": "对冲", "value": "hedging" } ], "default": "guarantee", "description": "缓释手段" }
+  ],
+  "outputs": [
+    { "key": "expected_loss", "label": "期望损失EL", "type": "scalar", "unit": "元" },
+    { "key": "unexpected_loss", "label": "非预期损失UL", "type": "scalar", "unit": "元" },
+    { "key": "var_99", "label": "风险价值VaR(99%)", "type": "scalar", "unit": "元" },
+    { "key": "stress_loss_compare", "label": "压力测试损失", "type": "compare", "unit": "元" },
+    { "key": "coverage_ratio", "label": "风险覆盖倍数", "type": "gauge", "unit": "倍" },
+    { "key": "contagion_network", "label": "风险传染网络", "type": "topo" }
+  ],
+  "constraints": [
+    { "name": "coverage_ok", "expression": "coverage_ratio > 1.2", "message": "风险覆盖倍数需>1.2；单一客户集中度需<30%" }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "chapter": { "code": "CH11", "name": "第十一章 现代物流与供应链发展", "sortNo": 11 },
+  "moduleId": "CH11-006",
+  "name": "绿色供应链策略综合选择仿真",
+  "engineKey": "green-strategy",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "绿色采购/绿色制造/绿色包装/绿色物流/绿色消费、多策略组合",
+  "description": "企业供应链绿色化投资决策：可选绿色化措施(各有成本和效果)——绿色采购(环保原料+5%成本/-30%碳排)、绿色制造(清洁能源/+10%能源成本/-50%碳排)、绿色包装(可降解材料/+8%成本/-40%塑料)、绿色物流(新能源车队/+15%成本/-60%运输碳排)、产品回收计划；预算约束下选择策略组合→多期模拟(投入前期、回报中后期)；设定无碳政策/碳税/碳交易+补贴情景观察最优组合变化",
+  "deps": ["CH11-004", "CH11-005"],
+  "params": [
+    { "key": "annual_revenue", "label": "年营收", "type": "float", "unit": "万元", "min": 1000, "max": 100000, "step": 1000, "default": 10000, "description": "预算基准" },
+    { "key": "green_budget_ratio", "label": "绿色化总预算", "type": "float", "unit": "%", "min": 1, "max": 10, "step": 1, "default": 5, "description": "年营收的1-10%，投资约束" },
+    { "key": "purchase_premium", "label": "绿色采购成本上浮", "type": "float", "unit": "%", "min": 5, "max": 20, "step": 1, "default": 10, "description": "环保原料溢价" },
+    { "key": "manufacture_premium", "label": "绿色制造成本上浮", "type": "float", "unit": "%", "min": 5, "max": 20, "step": 1, "default": 10, "description": "清洁能源溢价" },
+    { "key": "packaging_premium", "label": "绿色包装成本上浮", "type": "float", "unit": "%", "min": 5, "max": 20, "step": 1, "default": 8, "description": "可降解材料溢价" },
+    { "key": "logistics_premium", "label": "绿色物流成本上浮", "type": "float", "unit": "%", "min": 5, "max": 20, "step": 1, "default": 15, "description": "新能源车队溢价" },
+    { "key": "purchase_cut", "label": "绿色采购碳减排", "type": "float", "unit": "%", "min": 20, "max": 60, "step": 5, "default": 30, "description": "减排幅度" },
+    { "key": "manufacture_cut", "label": "绿色制造碳减排", "type": "float", "unit": "%", "min": 20, "max": 60, "step": 5, "default": 50, "description": "减排幅度" },
+    { "key": "packaging_cut", "label": "绿色包装碳减排", "type": "float", "unit": "%", "min": 20, "max": 60, "step": 5, "default": 40, "description": "减排幅度" },
+    { "key": "logistics_cut", "label": "绿色物流碳减排", "type": "float", "unit": "%", "min": 20, "max": 60, "step": 5, "default": 60, "description": "减排幅度" },
+    { "key": "green_premium_willingness", "label": "消费者绿色溢价支付意愿", "type": "float", "unit": "%", "min": 0, "max": 15, "step": 1, "default": 5, "description": "市场接受度" },
+    { "key": "government_subsidy", "label": "政府绿色补贴", "type": "float", "unit": "%", "min": 0, "max": 30, "step": 5, "default": 10, "description": "投资额的0-30%，政策激励" },
+    { "key": "carbon_price", "label": "碳交易价格", "type": "float", "unit": "元/吨", "min": 50, "max": 200, "step": 10, "default": 100, "description": "碳市场" },
+    { "key": "carbon_fine", "label": "碳排放罚款", "type": "float", "unit": "元/吨", "min": 50, "max": 200, "step": 10, "default": 100, "description": "超标罚款" },
+    { "key": "investment_years", "label": "投资评估周期", "type": "int", "unit": "年", "min": 3, "max": 10, "step": 1, "default": 5, "description": "NPV计算年限" },
+    { "key": "discount_rate", "label": "折现率", "type": "float", "min": 0.05, "max": 0.12, "step": 0.01, "default": 0.08, "description": "NPV折现" }
+  ],
+  "outputs": [
+    { "key": "npv_compare", "label": "各策略NPV", "type": "compare", "unit": "元" },
+    { "key": "carbon_reduction", "label": "总碳排放减少", "type": "scalar", "unit": "吨" },
+    { "key": "total_cost", "label": "含碳成本的总成本", "type": "scalar", "unit": "元" },
+    { "key": "market_share_series", "label": "绿色市场份额变化", "type": "series", "unit": "%" },
+    { "key": "pareto_frontier", "label": "最优策略组合(Pareto前沿)", "type": "compare" }
+  ],
+  "constraints": [
+    { "name": "budget_ok", "expression": "green_budget_ratio <= 10", "message": "总投资需≤预算（绿色化预算为年营收的1-10%）" },
+    { "name": "compliance_ok", "expression": "discount_rate >= 0.05", "message": "碳排放需满足法规（碳价/罚款情景下需评估合规成本）" }
+  ]
+}

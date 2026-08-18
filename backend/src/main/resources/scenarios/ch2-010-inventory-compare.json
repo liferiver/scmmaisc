@@ -1,0 +1,33 @@
+{
+  "chapter": { "code": "CH2", "name": "第二章 物流系统控制", "sortNo": 2 },
+  "moduleId": "CH2-010",
+  "name": "库存管理综合对比仿真(EOQ/POQ/缺货/随机四模型)",
+  "engineKey": "inventory-compare",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "四种库存模型对比(确定EOQ/非瞬时补货/允许缺货EOQ/随机(s,Q))、模型选择决策树、确定性vs随机性",
+  "description": "同一需求场景下分别运行四种模型（子模型参数集组合）：确定EOQ / 非瞬时补货 / 允许缺货EOQ / 随机(s,Q) → 对比各模型库存曲线/成本/服务水平 → 根据业务特征推荐模型；控制变量比较",
+  "deps": ["CH2-003", "CH2-004", "CH2-005", "CH2-006"],
+  "params": [
+    { "key": "annual_demand", "label": "年需求量D", "type": "int", "unit": "单位/年", "min": 100, "max": 100000, "step": 100, "default": 10000, "description": "确定性模型共享需求" },
+    { "key": "order_cost", "label": "单次订货成本", "type": "float", "unit": "元/次", "min": 10, "max": 5000, "step": 10, "default": 100, "description": "EOQ/缺货EOQ 共用" },
+    { "key": "holding_cost", "label": "单位年持有成本", "type": "float", "unit": "元/单位·年", "min": 1, "max": 500, "step": 1, "default": 2, "description": "四模型共用" },
+    { "key": "lead_time", "label": "提前期L", "type": "float", "unit": "天", "min": 1, "max": 14, "step": 1, "default": 7, "description": "(s,Q) 与 ROP 计算用" },
+    { "key": "daily_demand", "label": "日需求率d", "type": "float", "unit": "单位/天", "min": 0.0001, "max": 1000, "step": 5, "default": 27.4, "description": "默认 D/365（均匀需求假设）" },
+    { "key": "setup_cost", "label": "生产准备成本", "type": "float", "unit": "元/次", "min": 10, "max": 5000, "step": 10, "default": 100, "description": "POQ 模型使用" },
+    { "key": "production_rate", "label": "日生产率p", "type": "float", "unit": "单位/天", "min": 10, "max": 2000, "step": 5, "default": 200, "description": "POQ 模型使用（p>d）" },
+    { "key": "backorder_cost", "label": "单位年缺货成本", "type": "float", "unit": "元/单位·年", "min": 3, "max": 5000, "step": 1, "default": 10, "description": "缺货EOQ 模型使用" },
+    { "key": "demand_dist", "label": "日需求分布", "type": "dist", "default": { "distType": "normal", "mean": 100, "sigma": 10 }, "description": "(s,Q) 模型使用：dist{normal,μ,σ} 或 dist{poisson,λ}" },
+    { "key": "order_qty", "label": "订货批量Q", "type": "int", "unit": "单位", "min": 50, "max": 5000, "step": 10, "default": 1000, "description": "(s,Q) 模型使用" },
+    { "key": "service_level", "label": "目标服务水平α", "type": "float", "min": 0.90, "max": 0.999, "step": 0.005, "default": 0.95, "description": "(s,Q) 模型使用" },
+    { "key": "stockout_cost", "label": "单位缺货成本p", "type": "float", "unit": "元/单位", "min": 10, "max": 5000, "step": 10, "default": 50, "description": "(s,Q) 模型使用" }
+  ],
+  "outputs": [
+    { "key": "cost_compare", "label": "四模型成本对比", "type": "compare", "unit": "元" },
+    { "key": "inventory_curves", "label": "库存水平波动对比", "type": "series", "unit": "单位" },
+    { "key": "model_decision", "label": "模型选择决策树", "type": "topo" },
+    { "key": "fit_heatmap", "label": "各模型适用条件匹配度", "type": "heatmap" }
+  ],
+  "constraints": []
+}

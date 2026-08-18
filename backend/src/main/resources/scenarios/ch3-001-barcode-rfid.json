@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH3", "name": "第三章 物流技术与信息系统", "sortNo": 3 },
+  "moduleId": "CH3-001",
+  "name": "条码/RFID信息自动采集与追溯仿真",
+  "engineKey": "barcode-rfid",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "一维条码、二维码(QR Code)、RFID射频识别、自动采集、全链路追溯",
+  "description": "物品贴标 → 进入读取区(门禁/手持/固定读写器) → 条码模式单件扫码(需人工对准) / RFID模式批量自动读取(无需对准) → 数据上传WMS/TMS → 全链路追溯查询(生产-仓储-运输-零售)；对比条码+人工 vs RFID+自动门禁在电商大促场景下的效率差异",
+  "deps": [],
+  "params": [
+    { "key": "tech_type", "label": "识别方式", "type": "enum", "default": "rfid_hf", "options": [ { "label": "一维条码", "value": "one_dim_barcode" }, { "label": "二维码", "value": "qr_code" }, { "label": "RFID高频", "value": "rfid_hf" }, { "label": "RFID超高频", "value": "rfid_uhf" } ], "description": "技术选型" },
+    { "key": "throughput_rate", "label": "物品通过速率", "type": "float", "unit": "件/分钟", "min": 10, "max": 600, "step": 10, "default": 300, "description": "影响识别成功率" },
+    { "key": "read_distance", "label": "读取距离", "type": "float", "unit": "m", "min": 0.1, "max": 10, "step": 0.1, "default": 1.0, "description": "RFID 受距离影响大" },
+    { "key": "interference", "label": "环境干扰等级", "type": "int", "unit": "级", "min": 1, "max": 5, "step": 1, "default": 2, "description": "金属/液体对 RFID 干扰" },
+    { "key": "tag_cost", "label": "标签成本", "type": "float", "unit": "元/个", "min": 0.01, "max": 2, "step": 0.01, "default": 0.1, "description": "条码 vs RFID 成本差异" },
+    { "key": "scan_time", "label": "单件扫码时间", "type": "float", "unit": "秒", "min": 1, "max": 5, "step": 0.1, "default": 2, "description": "条码人工扫码耗时" }
+  ],
+  "outputs": [
+    { "key": "recognition_rate", "label": "识别成功率", "type": "gauge", "unit": "%" },
+    { "key": "miss_rate", "label": "漏读率", "type": "scalar", "unit": "%" },
+    { "key": "processing_rate", "label": "单位时间处理量", "type": "scalar", "unit": "件/分钟" },
+    { "key": "trace_completeness", "label": "全链路追溯完整度", "type": "gauge", "unit": "%" },
+    { "key": "cost_efficiency", "label": "成本-效率对比", "type": "compare" }
+  ],
+  "constraints": [
+    { "name": "recognition_ok", "expression": "throughput_rate <= 600", "message": "识别成功率需大于 99%（零售场景），通过速率过高将导致漏读" }
+  ]
+}

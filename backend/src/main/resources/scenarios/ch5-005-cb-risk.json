@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH5", "name": "第五章 跨境物流管理", "sortNo": 5 },
+  "moduleId": "CH5-005",
+  "name": "跨境物流风险应对仿真(汇率/政治/自然)",
+  "engineKey": "cb-risk",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "汇率风险、政治风险(制裁/禁运)、自然风险(港口罢工/天气)、风险应急策略",
+  "description": "跨境物流计划执行中 → 随机风险事件注入(汇率波动±10%/目的国加征关税/运河堵塞) → 触发应急预案(改道/保险理赔/汇率对冲/备选供应商) → 评估损失和恢复代价 → 风险策略优化；在某风险事件发生后做实时应急决策，事后复盘最优应对策略",
+  "deps": ["CH5-001"],
+  "params": [
+    { "key": "fx_volatility", "label": "汇率波动率", "type": "float", "min": 0.05, "max": 0.2, "step": 0.01, "default": 0.1, "description": "年波动幅度(±)" },
+    { "key": "political_risk_prob", "label": "政治风险概率", "type": "float", "min": 0.01, "max": 0.1, "step": 0.01, "default": 0.05, "description": "贸易摩擦/制裁概率" },
+    { "key": "natural_risk_prob", "label": "自然灾害概率", "type": "float", "min": 0.01, "max": 0.05, "step": 0.005, "default": 0.02, "description": "港口关闭/极端天气" },
+    { "key": "fx_hedge_ratio", "label": "汇率对冲覆盖率", "type": "float", "min": 0, "max": 1.0, "step": 0.05, "default": 0.5, "description": "金融工具对冲" },
+    { "key": "backup_options", "label": "备选路线/供应商数量", "type": "int", "unit": "个", "min": 0, "max": 3, "step": 1, "default": 1, "description": "冗余度" },
+    { "key": "insurance_ratio", "label": "货物保险覆盖率", "type": "float", "min": 0, "max": 1.0, "step": 0.05, "default": 0.8, "description": "保险对冲物理损失" }
+  ],
+  "outputs": [
+    { "key": "expected_loss", "label": "期望损失", "type": "scalar", "unit": "万元" },
+    { "key": "var_95", "label": "风险价值VaR", "type": "scalar", "unit": "万元" },
+    { "key": "hedge_effectiveness", "label": "对冲成本vs风险降低", "type": "compare", "unit": "万元" },
+    { "key": "scenario_analysis", "label": "不同策略情景分析", "type": "compare" },
+    { "key": "recovery_time", "label": "恢复时间分布", "type": "dist", "unit": "天" }
+  ],
+  "constraints": [
+    { "name": "risk_budget_ok", "expression": "fx_hedge_ratio + backup_options * 0.2 + insurance_ratio >= 0.6", "message": "单次损失需不超过风险预算：对冲/备选/保险综合防护水平需 ≥ 0.6" }
+  ]
+}

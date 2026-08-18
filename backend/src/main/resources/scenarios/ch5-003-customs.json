@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH5", "name": "第五章 跨境物流管理", "sortNo": 5 },
+  "moduleId": "CH5-003",
+  "name": "报关-报检-通关流程仿真",
+  "engineKey": "customs",
+  "difficulty": "advanced",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "HS编码归类、申报要素、关税计算、AEO认证、单一窗口",
+  "description": "货物信息 → HS编码归类 → 确定监管条件(许可证/检验检疫) → 申报(单一窗口录入) → 电子审单 → 人工审单(如有) → 查验(随机/布控) → 缴税(关税+增值税+消费税) → 放行 → 提货/装船；设置低报价格省关税但面临被查罚款的道德困境，让学生做风险决策",
+  "deps": ["CH5-001"],
+  "params": [
+    { "key": "goods_type", "label": "商品类型", "type": "enum", "default": "electronics", "options": [ { "label": "普通货物", "value": "general" }, { "label": "食品", "value": "food" }, { "label": "化妆品", "value": "cosmetics" }, { "label": "电子产品", "value": "electronics" }, { "label": "机械", "value": "machinery" } ], "description": "监管条件不同" },
+    { "key": "hs_accuracy", "label": "HS编码准确率", "type": "float", "min": 0.8, "max": 1.0, "step": 0.01, "default": 0.95, "description": "归类错误=退单/处罚" },
+    { "key": "declaration_value", "label": "申报价值合规性", "type": "enum", "default": "compliance", "options": [ { "label": "合规", "value": "compliance" }, { "label": "低报10%", "value": "low_report_10" }, { "label": "低报30%", "value": "low_report_30" } ], "description": "低报风险自担" },
+    { "key": "aeo_certified", "label": "AEO认证状态", "type": "bool", "default": false, "description": "AEO 企业查验率低" },
+    { "key": "doc_completeness", "label": "申报资料完整度", "type": "float", "min": 0.7, "max": 1.0, "step": 0.01, "default": 0.98, "description": "资料不全=退单" },
+    { "key": "random_inspect_rate", "label": "查验概率(随机)", "type": "float", "min": 0.01, "max": 0.05, "step": 0.005, "default": 0.03, "description": "AEO 企业降低" },
+    { "key": "targeted_inspect_rate", "label": "查验概率(布控)", "type": "float", "min": 0, "max": 0.3, "step": 0.01, "default": 0.1, "description": "风险布控" }
+  ],
+  "outputs": [
+    { "key": "clearance_time", "label": "通关总耗时", "type": "series", "unit": "天" },
+    { "key": "inspect_rate", "label": "查验率", "type": "scalar", "unit": "%" },
+    { "key": "tariff_total", "label": "关税总额", "type": "scalar", "unit": "元" },
+    { "key": "risk_score", "label": "合规风险评分", "type": "gauge" },
+    { "key": "reject_rate", "label": "退单率", "type": "scalar", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "compliance_ok", "expression": "declaration_value != 'low_report_30'", "message": "需保持合规（低报风险纳入期望损失，低报 30% 将触发高额罚款风险）" }
+  ]
+}

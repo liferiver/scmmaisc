@@ -1,0 +1,35 @@
+{
+  "chapter": { "code": "CH6", "name": "第六章 供应链管理", "sortNo": 6 },
+  "moduleId": "CH6-001",
+  "name": "供应链战略联盟伙伴选择仿真",
+  "engineKey": "alliance-partner",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "战略联盟、核心竞争力识别、伙伴评价、兼容性分析、信任机制",
+  "description": "企业自我评估(识别核心竞争力) → 确定联盟需求(补充哪些能力) → 候选伙伴评估(资源互补性/文化兼容/战略目标一致性/信任度) → 多维度评分排序 → 联盟可行性评估 → 伙伴确认；讨论真实案例——为什么有些战略联盟失败(文化不兼容/信任缺失)",
+  "deps": ["CH1-001"],
+  "params": [
+    { "key": "self_rd", "label": "自身能力-研发", "type": "float", "min": 0, "max": 10, "step": 0.5, "default": 6, "description": "自身能力矩阵 float[5] 转写" },
+    { "key": "self_procurement", "label": "自身能力-采购", "type": "float", "min": 0, "max": 10, "step": 0.5, "default": 5, "description": "自身能力矩阵 float[5] 转写" },
+    { "key": "self_manufacturing", "label": "自身能力-制造", "type": "float", "min": 0, "max": 10, "step": 0.5, "default": 7, "description": "自身能力矩阵 float[5] 转写" },
+    { "key": "self_logistics", "label": "自身能力-物流", "type": "float", "min": 0, "max": 10, "step": 0.5, "default": 4, "description": "自身能力矩阵 float[5] 转写" },
+    { "key": "self_marketing", "label": "自身能力-营销", "type": "float", "min": 0, "max": 10, "step": 0.5, "default": 5, "description": "自身能力矩阵 float[5] 转写" },
+    { "key": "candidate_count", "label": "候选伙伴数量", "type": "int", "unit": "个", "min": 5, "max": 20, "step": 1, "default": 10, "description": "候选池" },
+    { "key": "weight_complement", "label": "评估权重-资源互补", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.4, "description": "评估维度权重 float[4] 和=1 转写" },
+    { "key": "weight_culture", "label": "评估权重-文化兼容", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.2, "description": "评估维度权重 float[4] 和=1 转写" },
+    { "key": "weight_strategy", "label": "评估权重-战略一致", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.2, "description": "评估维度权重 float[4] 和=1 转写" },
+    { "key": "weight_trust", "label": "评估权重-信任", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.2, "description": "评估维度权重 float[4] 和=1 转写" },
+    { "key": "competition_intensity", "label": "行业竞争强度", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.5, "description": "影响联盟稳定性" },
+    { "key": "has_history", "label": "合作历史", "type": "bool", "default": false, "description": "有无合作基础" }
+  ],
+  "outputs": [
+    { "key": "partner_ranking", "label": "候选伙伴排名", "type": "compare" },
+    { "key": "fit_score", "label": "联盟契合度评分", "type": "scalar" },
+    { "key": "complement_radar", "label": "能力互补雷达图", "type": "compare" },
+    { "key": "alliance_risk", "label": "联盟风险评分", "type": "gauge" }
+  ],
+  "constraints": [
+    { "name": "weight_sum", "expression": "weight_complement + weight_culture + weight_strategy + weight_trust == 1", "message": "评估维度权重之和需等于 1" }
+  ]
+}

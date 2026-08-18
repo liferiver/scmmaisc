@@ -1,0 +1,34 @@
+{
+  "chapter": { "code": "CH11", "name": "第十一章 现代物流与供应链发展", "sortNo": 11 },
+  "moduleId": "CH11-002",
+  "name": "机器学习vs深度学习需求预测对比仿真",
+  "engineKey": "ml-forecast",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": false,
+  "concept": "随机森林(RF)、XGBoost、LSTM、特征工程、时间序列交叉验证",
+  "description": "多维特征数据集(历史需求+价格+促销+节假日+天气+竞品价格)→特征工程(滞后特征/滚动统计/日期特征编码)→训练多种模型：传统ARIMA(基线)/线性回归(基准ML)、树模型Random Forest→XGBoost、深度学习LSTM→时间序列交叉验证(避免数据泄露)→对比测试集MAPE→特征重要性分析；重点展示促销期传统方法失真而ML/DL可捕捉的模式",
+  "deps": ["CH11-001"],
+  "params": [
+    { "key": "history_days", "label": "历史数据时长", "type": "int", "unit": "天", "min": 365, "max": 1095, "step": 30, "default": 730, "description": "日粒度多维数据" },
+    { "key": "promo_frequency", "label": "促销事件频率", "type": "float", "min": 0.05, "max": 0.2, "step": 0.01, "default": 0.1, "description": "促销天数占比" },
+    { "key": "lag_order", "label": "滞后阶数", "type": "int", "unit": "阶", "min": 7, "max": 30, "step": 1, "default": 14, "description": "特征工程lag" },
+    { "key": "xgb_estimators", "label": "XGBoost树数量", "type": "int", "min": 100, "max": 500, "step": 50, "default": 300, "description": "n_estimators" },
+    { "key": "xgb_max_depth", "label": "XGBoost最大深度", "type": "int", "min": 3, "max": 10, "step": 1, "default": 6, "description": "max_depth" },
+    { "key": "lstm_hidden", "label": "LSTM隐层单元", "type": "int", "min": 16, "max": 128, "step": 16, "default": 64, "description": "hidden units" },
+    { "key": "lstm_layers", "label": "LSTM层数", "type": "int", "min": 1, "max": 3, "step": 1, "default": 2, "description": "layers" },
+    { "key": "lstm_lr", "label": "LSTM学习率", "type": "float", "min": 0.0001, "max": 0.01, "step": 0.0001, "default": 0.001, "description": "learning rate" },
+    { "key": "train_ratio", "label": "训练比例", "type": "float", "min": 0.5, "max": 0.8, "step": 0.05, "default": 0.6, "description": "训练集占比" },
+    { "key": "val_ratio", "label": "验证比例", "type": "float", "min": 0.1, "max": 0.3, "step": 0.05, "default": 0.2, "description": "验证集占比，剩余为测试集" }
+  ],
+  "outputs": [
+    { "key": "mape_compare", "label": "各模型MAPE对比", "type": "compare", "unit": "%" },
+    { "key": "forecast_curves", "label": "预测曲线(多模型)", "type": "series", "unit": "件" },
+    { "key": "feature_importance", "label": "特征重要性排名", "type": "compare" },
+    { "key": "time_compare", "label": "训练/推理时间", "type": "compare", "unit": "ms" },
+    { "key": "promo_accuracy", "label": "促销期预测精度对比", "type": "compare", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "cv_ok", "expression": "train_ratio + val_ratio < 1", "message": "时间序列交叉验证需先训练后测试，避免数据泄露（训练/验证/测试=0.6/0.2/0.2）" }
+  ]
+}

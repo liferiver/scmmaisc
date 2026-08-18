@@ -1,0 +1,29 @@
+{
+  "chapter": { "code": "CH4", "name": "第四章 电子商务环境下的物流系统", "sortNo": 4 },
+  "moduleId": "CH4-002",
+  "name": "B2B/B2C/C2C/O2O电商模式物流适配仿真",
+  "engineKey": "ecommerce-mode",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "电商模式分类、物流模式匹配、订单特征差异(批量/频次/时效/退货率)",
+  "description": "选择电商模式(B2B/B2C/C2C/O2O/B2G/C2B) → 分析该模式订单特征(批量/频次/时效/退货率) → 匹配物流方案(整车/零担/快递/即时配送/到店自提) → 成本-时效-体验三维评估；给定具体商品让学生选择最优电商模式+物流组合",
+  "deps": ["CH1-004"],
+  "params": [
+    { "key": "mode", "label": "电商模式", "type": "enum", "default": "b2c", "options": [ { "label": "B2B", "value": "b2b" }, { "label": "B2C", "value": "b2c" }, { "label": "C2C", "value": "c2c" }, { "label": "O2O", "value": "o2o" }, { "label": "B2G", "value": "b2g" }, { "label": "C2B", "value": "c2b" } ], "description": "六种模式" },
+    { "key": "order_value", "label": "客单价", "type": "float", "unit": "元", "min": 10, "max": 100000, "step": 10, "default": 200, "description": "影响物流成本占比" },
+    { "key": "daily_orders", "label": "日均订单量", "type": "int", "unit": "单", "min": 100, "max": 500000, "step": 100, "default": 10000, "description": "影响物流方式选择" },
+    { "key": "delivery_requirement", "label": "时效要求", "type": "enum", "default": "same_day", "options": [ { "label": "30分钟", "value": "30min" }, { "label": "当日达", "value": "same_day" }, { "label": "次日达", "value": "next_day" }, { "label": "3-5天", "value": "3_5days" } ], "description": "各模式差异大" },
+    { "key": "return_rate", "label": "退货率", "type": "float", "min": 0.02, "max": 0.3, "step": 0.01, "default": 0.15, "description": "B2C 退货率高" },
+    { "key": "delivery_radius", "label": "配送半径", "type": "float", "unit": "km", "min": 3, "max": 3000, "step": 10, "default": 50, "description": "O2O 通常 3-5km" }
+  ],
+  "outputs": [
+    { "key": "cost_rate", "label": "物流成本率", "type": "scalar", "unit": "%" },
+    { "key": "ontime_rate", "label": "时效达成率", "type": "gauge", "unit": "%" },
+    { "key": "mode_recommend", "label": "最优物流模式推荐", "type": "compare" },
+    { "key": "fit_matrix", "label": "各模式适用条件矩阵", "type": "heatmap" }
+  ],
+  "constraints": [
+    { "name": "cost_rate_ok", "expression": "return_rate <= 0.25", "message": "物流成本率需不超过行业基准(如 B2C<15%)，高退货率将推高成本率" }
+  ]
+}

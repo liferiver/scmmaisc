@@ -1,0 +1,32 @@
+{
+  "chapter": { "code": "CH9", "name": "第九章 供应链金融", "sortNo": 9 },
+  "moduleId": "CH9-003",
+  "name": "预付款/保兑仓融资仿真",
+  "engineKey": "advance-payment",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "预付账款融资、保兑仓、未来货权质押、核心企业担保/回购承诺",
+  "description": "经销商向核心企业采购需预付款但自有资金不足→向银行申请预付款融资→银行审查贸易背景+核心企业承诺→核心企业签署担保/回购/差额补足协议→银行放款给核心企业(定向支付)→核心企业发货至指定仓库→货物入库转为存货质押→经销商销售回款分批赎货偿还贷款",
+  "deps": ["CH9-001", "CH9-002"],
+  "params": [
+    { "key": "purchase_amount", "label": "采购总额", "type": "float", "unit": "万元", "min": 200, "max": 20000, "step": 200, "default": 5000, "description": "采购合同金额" },
+    { "key": "self_fund_ratio", "label": "经销商自有资金比例", "type": "float", "min": 0.2, "max": 0.5, "step": 0.05, "default": 0.3, "description": "自有/总价" },
+    { "key": "bank_finance_ratio", "label": "银行融资比例", "type": "float", "min": 0.5, "max": 0.8, "step": 0.05, "default": 0.7, "description": "银行出资金额占比" },
+    { "key": "repurchase_commitment", "label": "核心企业回购承诺额度", "type": "float", "min": 0.5, "max": 1.0, "step": 0.05, "default": 0.8, "description": "回购保障比例(×融资本金)" },
+    { "key": "credit_rating", "label": "核心企业信用评级", "type": "enum", "options": [ { "label": "AAA", "value": "AAA" }, { "label": "AA", "value": "AA" }, { "label": "A", "value": "A" } ], "default": "AAA", "description": "核心企业担保信用" },
+    { "key": "price_volatility", "label": "货物市场价格波动", "type": "float", "min": 0.1, "max": 0.3, "step": 0.05, "default": 0.2, "description": "销售期价格波动幅度(±)" },
+    { "key": "payment_cycle", "label": "经销商销售回款周期", "type": "float", "unit": "天", "min": 30, "max": 180, "step": 10, "default": 90, "description": "回款速度" },
+    { "key": "warehouse_supervisor", "label": "仓库监管方", "type": "enum", "options": [ { "label": "银行指定", "value": "bank_designated" }, { "label": "第三方", "value": "third_party" }, { "label": "核心企业", "value": "core_enterprise" } ], "default": "third_party", "description": "监管可靠性" }
+  ],
+  "outputs": [
+    { "key": "cashflow_timeline", "label": "各方资金流动时间线", "type": "series", "unit": "元" },
+    { "key": "bank_exposure_series", "label": "银行风险敞口变化", "type": "series", "unit": "元" },
+    { "key": "dealer_roe_leverage", "label": "经销商ROE杠杆效应", "type": "scalar", "unit": "%" },
+    { "key": "recovery_rate", "label": "违约后银行追偿回收率", "type": "scalar", "unit": "%" },
+    { "key": "party_pnl", "label": "各方损益", "type": "compare", "unit": "元" }
+  ],
+  "constraints": [
+    { "name": "directed_payment", "expression": "bank_finance_ratio <= 0.8", "message": "银行资金需定向支付给核心企业（不流经经销商），货物需全程监管" }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "chapter": { "code": "CH3", "name": "第三章 物流技术与信息系统", "sortNo": 3 },
+  "moduleId": "CH3-003",
+  "name": "EDI电子数据交换单证流转仿真",
+  "engineKey": "edi",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "EDI标准格式、单证自动流转、VAN增值网络、报文标准(EDIFACT/ANSI X12)、ASN发货通知",
+  "description": "采购方生成采购订单(内部格式→EDI标准格式转换) → VAN/互联网传输 → 供应方接收(EDI→内部格式) → 订单确认 → 发货通知(ASN) → 收货确认 → 发票流转；对比 EDI 与传统人工方式的差错率与流转时间，计算 ROI 回收期",
+  "deps": [],
+  "params": [
+    { "key": "daily_documents", "label": "日交易单证量", "type": "int", "unit": "份", "min": 50, "max": 5000, "step": 50, "default": 500, "description": "日 EDI 报文量" },
+    { "key": "message_standard", "label": "报文标准", "type": "enum", "default": "edifact", "options": [ { "label": "EDIFACT", "value": "edifact" }, { "label": "ANSI X12", "value": "ansi_x12" }, { "label": "XML", "value": "xml" }, { "label": "JSON/API", "value": "json_api" } ], "description": "报文格式选型" },
+    { "key": "manual_error_rate", "label": "人工录入差错率", "type": "float", "min": 0.005, "max": 0.05, "step": 0.005, "default": 0.02, "description": "EDI 之前人工录入的基准差错" },
+    { "key": "auto_error_rate", "label": "EDI自动转换错误率", "type": "float", "min": 0.0001, "max": 0.001, "step": 0.0001, "default": 0.0002, "description": "EDI 自动转换的差错率" },
+    { "key": "transfer_delay", "label": "传输延迟", "type": "float", "unit": "秒", "min": 1, "max": 60, "step": 1, "default": 5, "description": "VAN/互联网延迟" },
+    { "key": "implementation_cost", "label": "实施成本", "type": "float", "unit": "万元", "min": 10, "max": 200, "step": 5, "default": 50, "description": "开发+测试+认证一次性投入" }
+  ],
+  "outputs": [
+    { "key": "efficiency_gain", "label": "单证处理效率提升率", "type": "scalar", "unit": "%" },
+    { "key": "error_compare", "label": "差错率对比(EDI vs 人工)", "type": "compare" },
+    { "key": "flow_time", "label": "端到端单证流转时间", "type": "series", "unit": "分钟" },
+    { "key": "roi_payback", "label": "ROI回收期", "type": "scalar", "unit": "年" }
+  ],
+  "constraints": [
+    { "name": "reliability_ok", "expression": "auto_error_rate <= 0.0005", "message": "传输可靠性需大于 99.99%（自动转换错误率需 ≤ 0.05%）" }
+  ]
+}

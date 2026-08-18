@@ -1,0 +1,35 @@
+{
+  "chapter": { "code": "CH1", "name": "第一章 概论", "sortNo": 1 },
+  "moduleId": "CH1-003",
+  "name": "供应/生产/销售/逆向物流四环节流转仿真",
+  "engineKey": "logistics-flow",
+  "difficulty": "intro",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "四类物流分类、物料流向、闭环流转、逆向物流",
+  "description": "供应商 → 供应物流(原料入库) → 生产物流(车间流转) → 销售物流(成品出库→客户) → 逆向物流(退货/回收→分拣→再利用/报废)；按 BOM 层级放大物料量，退货率驱动逆向物流，回收再利用率决定回流量",
+  "deps": [],
+  "params": [
+    { "key": "daily_output", "label": "日产量", "type": "int", "unit": "单位/天", "min": 100, "max": 10000, "step": 100, "default": 2000, "description": "驱动生产物流量" },
+    { "key": "bom_levels", "label": "BOM层级", "type": "int", "unit": "层", "min": 2, "max": 5, "step": 1, "default": 3, "description": "物料清单层级数" },
+    { "key": "return_rate", "label": "退货率", "type": "float", "min": 0.01, "max": 0.15, "step": 0.01, "default": 0.05, "description": "驱动逆向物流量" },
+    { "key": "recycle_rate", "label": "回收再利用率", "type": "float", "min": 0, "max": 0.8, "step": 0.05, "default": 0.5, "description": "逆向物流回流量" },
+    { "key": "lead_inbound", "label": "供应物流提前期", "type": "float", "unit": "天", "min": 0.5, "max": 7, "step": 0.5, "default": 2, "description": "四环节提前期之一（V2 文档 float[4] 转写）" },
+    { "key": "lead_production", "label": "生产物流提前期", "type": "float", "unit": "天", "min": 0.5, "max": 7, "step": 0.5, "default": 3, "description": "四环节提前期之一（V2 文档 float[4] 转写）" },
+    { "key": "lead_outbound", "label": "销售物流提前期", "type": "float", "unit": "天", "min": 0.5, "max": 7, "step": 0.5, "default": 1, "description": "四环节提前期之一（V2 文档 float[4] 转写）" },
+    { "key": "lead_reverse", "label": "逆向物流提前期", "type": "float", "unit": "天", "min": 0.5, "max": 7, "step": 0.5, "default": 2, "description": "四环节提前期之一（V2 文档 float[4] 转写）" },
+    { "key": "cost_inbound", "label": "供应物流单位成本", "type": "float", "unit": "元/单", "min": 0, "max": 100, "step": 0.5, "default": 5, "description": "四环节单位成本之一（V2 文档 float[4] 转写，默认值教材典型值）" },
+    { "key": "cost_production", "label": "生产物流单位成本", "type": "float", "unit": "元/单", "min": 0, "max": 100, "step": 0.5, "default": 3, "description": "四环节单位成本之一（V2 文档 float[4] 转写，默认值教材典型值）" },
+    { "key": "cost_outbound", "label": "销售物流单位成本", "type": "float", "unit": "元/单", "min": 0, "max": 100, "step": 0.5, "default": 4, "description": "四环节单位成本之一（V2 文档 float[4] 转写，默认值教材典型值）" },
+    { "key": "cost_reverse", "label": "逆向物流单位成本", "type": "float", "unit": "元/单", "min": 0, "max": 100, "step": 0.5, "default": 6, "description": "四环节单位成本之一（V2 文档 float[4] 转写，默认值教材典型值）" }
+  ],
+  "outputs": [
+    { "key": "flow_share", "label": "各环节物流量占比", "type": "compare", "unit": "%" },
+    { "key": "cost_share", "label": "各环节成本构成", "type": "compare", "unit": "元" },
+    { "key": "total_cost", "label": "物流总成本", "type": "scalar", "unit": "元" },
+    { "key": "flow_sankey", "label": "物料流转Sankey图", "type": "topo" }
+  ],
+  "constraints": [
+    { "name": "flow_balance", "expression": "sales = daily_output * (1 - return_rate) + daily_output * return_rate * recycle_rate", "message": "总产量 = 销售 + 退货 - 回收（物料守恒）" }
+  ]
+}

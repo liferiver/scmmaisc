@@ -1,0 +1,33 @@
+{
+  "chapter": { "code": "CH5", "name": "第五章 跨境物流管理", "sortNo": 5 },
+  "moduleId": "CH5-007",
+  "name": "海外仓选址与运营仿真",
+  "engineKey": "overseas-warehouse",
+  "difficulty": "advanced",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "海外仓、FBA(Fulfillment by Amazon)、前置备货、逆向物流、IPI库存绩效",
+  "description": "中国工厂 → 批量海运/空运 → 目的国海外仓(FBA/第三方仓/自建仓) → 消费者下单 → 海外仓本地配送(时效=国内快递) → 退货 → 海外仓接收 → 质检 → 二次上架或报废 → 滞销品处理(降价/销毁/退回国内)；讨论滞销库存对 FBA 容量的惩罚机制",
+  "deps": ["CH5-001", "CH5-006"],
+  "params": [
+    { "key": "target_country", "label": "目的国", "type": "enum", "default": "usa", "options": [ { "label": "美国", "value": "usa" }, { "label": "欧洲", "value": "europe" }, { "label": "日本", "value": "japan" }, { "label": "东南亚", "value": "se_asia" } ], "description": "海外仓所在国" },
+    { "key": "sku_count", "label": "备货SKU数", "type": "int", "unit": "个", "min": 20, "max": 2000, "step": 20, "default": 300, "description": "海外仓 SKU" },
+    { "key": "warehouse_mode", "label": "海外仓模式", "type": "enum", "default": "fba", "options": [ { "label": "FBA", "value": "fba" }, { "label": "第三方仓", "value": "third_party" }, { "label": "自建仓", "value": "self_built" } ], "description": "三种模式" },
+    { "key": "head_haul_cost", "label": "头程物流成本", "type": "float", "unit": "元/kg", "min": 3, "max": 30, "step": 1, "default": 12, "description": "中国→海外仓(海运/空运)" },
+    { "key": "storage_fee", "label": "仓储费", "type": "float", "unit": "美元/立方英尺·月", "min": 0.5, "max": 3.0, "step": 0.1, "default": 1.5, "description": "海外仓租金" },
+    { "key": "local_delivery_fee", "label": "本地配送费", "type": "float", "unit": "美元/单", "min": 3, "max": 8, "step": 0.5, "default": 5, "description": "目的国内配送" },
+    { "key": "return_rate", "label": "退货率", "type": "float", "min": 0.05, "max": 0.25, "step": 0.01, "default": 0.15, "description": "电商退货" },
+    { "key": "return_cost", "label": "退货处置成本", "type": "float", "unit": "美元/件", "min": 1, "max": 5, "step": 0.5, "default": 2, "description": "检验/翻新/报废" },
+    { "key": "ltsf_fee", "label": "长期仓储费(LTSF)", "type": "float", "unit": "美元/立方英尺·月", "min": 3, "max": 20, "step": 1, "default": 8, "description": "超过 365 天额外收费" }
+  ],
+  "outputs": [
+    { "key": "unit_cost_compare", "label": "单均成本对比(海外仓/直邮/保税)", "type": "compare", "unit": "美元/单" },
+    { "key": "delivery_compare", "label": "配送时效对比", "type": "compare", "unit": "天" },
+    { "key": "ipi_score", "label": "IPI库存绩效指数", "type": "scalar" },
+    { "key": "slow_sell_risk", "label": "滞销风险金额", "type": "scalar", "unit": "美元" },
+    { "key": "return_efficiency", "label": "退货处置效率", "type": "scalar", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "ipi_ok", "expression": "sku_count <= 2000", "message": "IPI 分数需大于 400（避免 FBA 容量限制）：保持合理备货深度" }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "chapter": { "code": "CH9", "name": "第九章 供应链金融", "sortNo": 9 },
+  "moduleId": "CH9-004",
+  "name": "供应链金融三种模式对比与选择仿真",
+  "engineKey": "finance-compare",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "应收vs预付vs存货融资对比、模式选择决策、适用场景",
+  "description": "给定企业特征(规模/行业/供应链位置/资产结构)→分析企业资产负债表识别可融资资产(应收/存货/预付)→评估三种模式的可得性、成本、风险→推荐最优融资模式或组合→运行多周期模拟验证融资效果；给定钢铁经销商/电子供应商/农产品加工三种企业特征推荐最优模式",
+  "deps": ["CH9-001", "CH9-002", "CH9-003"],
+  "params": [
+    { "key": "asset_total", "label": "资产总额", "type": "float", "unit": "万元", "min": 1000, "max": 100000, "step": 1000, "default": 10000, "description": "企业规模" },
+    { "key": "receivable_ratio", "label": "应收账款占比", "type": "float", "min": 0, "max": 0.5, "step": 0.05, "default": 0.3, "description": "可融资资产占比" },
+    { "key": "inventory_ratio", "label": "存货占比", "type": "float", "min": 0, "max": 0.5, "step": 0.05, "default": 0.2, "description": "可融资资产占比" },
+    { "key": "prepayment_ratio", "label": "预付账款占比", "type": "float", "min": 0, "max": 0.5, "step": 0.05, "default": 0.1, "description": "可融资资产占比" },
+    { "key": "supply_chain_position", "label": "企业供应链位置", "type": "enum", "options": [ { "label": "上游", "value": "upstream" }, { "label": "中游", "value": "midstream" }, { "label": "下游", "value": "downstream" } ], "default": "upstream", "description": "上游多应收、下游多预付" },
+    { "key": "core_credit_rating", "label": "核心企业信用等级", "type": "enum", "options": [ { "label": "AAA", "value": "AAA" }, { "label": "AA", "value": "AA" }, { "label": "A", "value": "A" }, { "label": "BBB", "value": "BBB" } ], "default": "AA", "description": "核心企业增信" },
+    { "key": "rate_receivable", "label": "应收模式利率", "type": "float", "min": 0.04, "max": 0.08, "step": 0.005, "default": 0.05, "description": "应收<预付<存货" },
+    { "key": "rate_prepayment", "label": "预付模式利率", "type": "float", "min": 0.05, "max": 0.1, "step": 0.005, "default": 0.07, "description": "介于应收与存货之间" },
+    { "key": "rate_inventory", "label": "存货模式利率", "type": "float", "min": 0.06, "max": 0.12, "step": 0.005, "default": 0.09, "description": "三种模式中最高" },
+    { "key": "days_receivable", "label": "应收办理周期", "type": "float", "unit": "工作日", "min": 3, "max": 20, "step": 1, "default": 7, "description": "效率差异" },
+    { "key": "days_prepayment", "label": "预付办理周期", "type": "float", "unit": "工作日", "min": 3, "max": 20, "step": 1, "default": 10, "description": "效率差异" },
+    { "key": "days_inventory", "label": "存货办理周期", "type": "float", "unit": "工作日", "min": 3, "max": 20, "step": 1, "default": 14, "description": "效率差异" }
+  ],
+  "outputs": [
+    { "key": "mode_compare", "label": "三种模式可得性/成本/风险对比", "type": "compare" },
+    { "key": "best_mode", "label": "最优模式推荐", "type": "scalar" },
+    { "key": "combined_efficiency", "label": "组合融资效率", "type": "gauge", "unit": "%" },
+    { "key": "cost_compare", "label": "融资成本对比", "type": "compare", "unit": "元" }
+  ],
+  "constraints": [
+    { "name": "ratio_sum_ok", "expression": "receivable_ratio + inventory_ratio + prepayment_ratio <= 1", "message": "资产负债表各项占比之和不能超过 1" },
+    { "name": "cost_within_margin", "expression": "rate_inventory <= 0.12", "message": "融资总成本不超过企业利润率" }
+  ]
+}

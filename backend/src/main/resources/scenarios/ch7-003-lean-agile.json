@@ -1,0 +1,30 @@
+{
+  "chapter": { "code": "CH7", "name": "第七章 供应链设计与构建", "sortNo": 7 },
+  "moduleId": "CH7-003",
+  "name": "精益/敏捷/精敏混合供应链策略仿真",
+  "engineKey": "lean-agile",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "Lean(精益=消除浪费)、Agile(敏捷=快速响应)、Leagile(精敏混合)、Fisher矩阵",
+  "description": "产品分类(Fisher矩阵): 功能型产品(需求可预测)→Lean策略 / 创新型产品(需求不可预测)→Agile策略 / 混合型→Leagile策略(解耦点前 Lean 标准件，解耦点后 Agile 定制) → 不同策略在多种市场条件下的绩效对比；给定不同产品(大米/时装/手机/疫苗)放入 Fisher 矩阵并选择策略",
+  "deps": ["CH7-002"],
+  "params": [
+    { "key": "product_type", "label": "产品类型", "type": "enum", "default": "functional", "options": [ { "label": "功能型", "value": "functional" }, { "label": "创新型", "value": "innovative" }, { "label": "混合型", "value": "hybrid" } ], "description": "Fisher 分类" },
+    { "key": "demand_predictability", "label": "需求可预测度", "type": "float", "min": 0.1, "max": 0.9, "step": 0.05, "default": 0.6, "description": "功能型>0.7，创新型<0.3" },
+    { "key": "supply_uncertainty", "label": "供应不确定性", "type": "float", "min": 0.05, "max": 0.4, "step": 0.05, "default": 0.15, "description": "供应风险" },
+    { "key": "lifecycle_stage", "label": "产品生命周期阶段", "type": "enum", "default": "growth", "options": [ { "label": "导入", "value": "intro" }, { "label": "成长", "value": "growth" }, { "label": "成熟", "value": "maturity" }, { "label": "衰退", "value": "decline" } ], "description": "影响策略选择" },
+    { "key": "strategy", "label": "策略选择", "type": "enum", "default": "leagile", "options": [ { "label": "Lean精益", "value": "lean" }, { "label": "Agile敏捷", "value": "agile" }, { "label": "Leagile精敏", "value": "leagile" } ], "description": "可调变量：策略选择" },
+    { "key": "lean_efficiency", "label": "Lean效率参数", "type": "float", "min": 0.5, "max": 1.0, "step": 0.05, "default": 0.8, "description": "浪费消除程度" },
+    { "key": "agile_flexibility", "label": "Agile柔性参数", "type": "float", "min": 0.5, "max": 1.0, "step": 0.05, "default": 0.7, "description": "快速响应程度" }
+  ],
+  "outputs": [
+    { "key": "fisher_matrix", "label": "Fisher矩阵定位", "type": "heatmap" },
+    { "key": "strategy_fit", "label": "策略匹配度评分", "type": "scalar" },
+    { "key": "efficiency_vs_speed", "label": "成本效率vs响应速度对比", "type": "compare" },
+    { "key": "mismatch_loss", "label": "失配损失", "type": "scalar", "unit": "元" }
+  ],
+  "constraints": [
+    { "name": "strategy_match", "expression": "demand_predictability >= 0.1", "message": "策略必须匹配产品类型（功能型需高可预测度，创新型需低可预测度），否则产生失配损失" }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "chapter": { "code": "CH8", "name": "第八章 供应链协同", "sortNo": 8 },
+  "moduleId": "CH8-003",
+  "name": "曲棍球棒效应仿真",
+  "engineKey": "hockey-stick",
+  "difficulty": "advanced",
+  "classHours": 1,
+  "isRolePlay": true,
+  "concept": "曲棍球棒效应、月末冲量、销售考核周期、发货量周期性扭曲",
+  "description": "月考核制：月初销售自然接单→发货平稳→中旬开始压货→月末集中发货冲 KPI→下月初发货骤降；量化十项负面影响(生产成本加班溢价/库存/运输/质量/人员流失/资金回款/排产波动等)；对比四种改善策略(平滑考核/滚动预测/取消月结/双月考核)",
+  "deps": [],
+  "params": [
+    { "key": "review_cycle", "label": "考核周期", "type": "enum", "options": [ { "label": "周", "value": "weekly" }, { "label": "月", "value": "monthly" }, { "label": "季", "value": "quarterly" } ], "default": "monthly", "description": "通常月度考核" },
+    { "key": "monthly_demand", "label": "月度自然需求", "type": "int", "unit": "件/月", "min": 1000, "max": 10000, "step": 500, "default": 5000, "description": "均匀需求假设" },
+    { "key": "month_end_ratio", "label": "月末冲量比例", "type": "float", "min": 0.3, "max": 0.7, "step": 0.05, "default": 0.5, "description": "月末发货占比" },
+    { "key": "overtime_factor", "label": "加班成本系数", "type": "float", "min": 1.5, "max": 3.0, "step": 0.1, "default": 2.0, "description": "赶工溢价" },
+    { "key": "return_ratio", "label": "压货客户退货比例", "type": "float", "min": 0.01, "max": 0.05, "step": 0.005, "default": 0.02, "description": "下月初退货比例" },
+    { "key": "improve_strategy", "label": "改善策略", "type": "enum", "options": [ { "label": "平滑考核", "value": "smooth_review" }, { "label": "滚动预测", "value": "rolling_forecast" }, { "label": "取消月结", "value": "remove_monthly" }, { "label": "双月考核", "value": "bi_monthly" } ], "default": "smooth_review", "description": "四种对策" }
+  ],
+  "outputs": [
+    { "key": "shipment_curve", "label": "月度发货量曲线", "type": "series", "unit": "件" },
+    { "key": "impact_table", "label": "十项负面影响量化表", "type": "compare" },
+    { "key": "strategy_compare", "label": "改善策略效果对比", "type": "compare" },
+    { "key": "resource_utilization", "label": "月度资源利用率波动", "type": "series", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "total_ok", "expression": "month_end_ratio <= 0.7", "message": "月总发货量=月总需求（压货不影响总量，但月末占比过高会放大负面效应）" }
+  ]
+}

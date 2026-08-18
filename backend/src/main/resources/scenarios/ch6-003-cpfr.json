@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH6", "name": "第六章 供应链管理", "sortNo": 6 },
+  "moduleId": "CH6-003",
+  "name": "CPFR协同规划预测补货仿真",
+  "engineKey": "cpfr",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "CPFR九步模型、协同规划、协同预测、协同补货、联合商业计划",
+  "description": "CPFR 九步: ①前端协议 → ②联合商业计划(促销/新品) → ③销售预测(各方独立预测→比对) → ④识别预测异常(差异>阈值) → ⑤协作解决异常 → ⑥订单预测 → ⑦识别订单异常 → ⑧协作解决异常 → ⑨订单生成执行；设置促销事件触发预测困难，展示 CPFR 如何通过信息共享解决预测差异",
+  "deps": [],
+  "params": [
+    { "key": "historical_sales", "label": "历史销售数据", "type": "timeseries", "description": "52 周历史销售，用于基础预测" },
+    { "key": "retailer_forecast", "label": "零售商预测", "type": "timeseries", "description": "后续 12 周零售商独立预测" },
+    { "key": "manufacturer_forecast", "label": "制造商预测", "type": "timeseries", "description": "后续 12 周制造商独立预测" },
+    { "key": "diff_threshold", "label": "预测差异阈值", "type": "float", "min": 0.1, "max": 0.3, "step": 0.01, "default": 0.2, "description": "差异超过阈值触发异常审查(±)" },
+    { "key": "info_share", "label": "信息共享程度", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.7, "description": "POS 数据对上游可见比例" },
+    { "key": "promotion", "label": "促销计划", "type": "bool", "default": false, "description": "促销事件" },
+    { "key": "collaboration_level", "label": "联合程度", "type": "enum", "default": "cpfr_full", "options": [ { "label": "无协同", "value": "none" }, { "label": "信息共享", "value": "info_share_only" }, { "label": "协同预测", "value": "collab_forecast" }, { "label": "完全CPFR", "value": "cpfr_full" } ], "description": "四个协同深度" }
+  ],
+  "outputs": [
+    { "key": "mape", "label": "预测准确率MAPE", "type": "scalar", "unit": "%" },
+    { "key": "channel_inventory", "label": "渠道总库存", "type": "series", "unit": "件" },
+    { "key": "stockout_rate", "label": "缺货率", "type": "scalar", "unit": "%" },
+    { "key": "cpfr_vs_none", "label": "CPFR vs 非协同对比", "type": "compare" },
+    { "key": "exception_efficiency", "label": "异常解决效率", "type": "scalar", "unit": "次/期" }
+  ],
+  "constraints": [
+    { "name": "threshold_ok", "expression": "diff_threshold >= 0.1", "message": "差异在阈值内自动通过，超阈值需协商（阈值需 ≥ 10%）" }
+  ]
+}

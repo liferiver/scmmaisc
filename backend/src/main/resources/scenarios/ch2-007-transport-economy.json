@@ -1,0 +1,35 @@
+{
+  "chapter": { "code": "CH2", "name": "第二章 物流系统控制", "sortNo": 2 },
+  "moduleId": "CH2-007",
+  "name": "运输规模经济与距离经济仿真",
+  "engineKey": "transport-economy",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "规模经济(批量↑→单位固定成本↓)、距离经济(距离↑→单位距离成本↓)、最优配载、装载率",
+  "description": "给定运输需求(OD距离/运量) → 选择运输方式(每种有固定+变动成本结构) → 计算不同批量下的单位成本 → 绘制单位成本-批量曲线 → 寻找最优装载率和最优运输方式；展示满载运输与零担拼车的经济性差异",
+  "deps": [],
+  "params": [
+    { "key": "od_distances", "label": "运输距离矩阵", "type": "matrix", "description": "每个 OD 对的距离（km，10-3000；V2 文档 matrix 转写）" },
+    { "key": "transport_mode", "label": "运输方式", "type": "enum", "default": "road", "options": [ { "label": "公路", "value": "road" }, { "label": "铁路", "value": "rail" }, { "label": "水运", "value": "water" }, { "label": "航空", "value": "air" } ], "description": "每种方式成本结构不同" },
+    { "key": "fixed_cost_road", "label": "公路单次固定成本", "type": "float", "unit": "元/趟", "min": 100, "max": 10000, "step": 100, "default": 500, "description": "单次固定成本之一（V2 文档 float[] 按运输方式拆分，默认值教材典型值）" },
+    { "key": "fixed_cost_rail", "label": "铁路单次固定成本", "type": "float", "unit": "元/趟", "min": 100, "max": 10000, "step": 100, "default": 2000, "description": "单次固定成本之一（V2 文档 float[] 按运输方式拆分，默认值教材典型值）" },
+    { "key": "fixed_cost_water", "label": "水运单次固定成本", "type": "float", "unit": "元/趟", "min": 100, "max": 10000, "step": 100, "default": 3000, "description": "单次固定成本之一（V2 文档 float[] 按运输方式拆分，默认值教材典型值）" },
+    { "key": "fixed_cost_air", "label": "航空单次固定成本", "type": "float", "unit": "元/趟", "min": 100, "max": 10000, "step": 100, "default": 1000, "description": "单次固定成本之一（V2 文档 float[] 按运输方式拆分，默认值教材典型值）" },
+    { "key": "var_cost_road", "label": "公路单位变动成本", "type": "float", "unit": "元/吨公里", "min": 0.01, "max": 5, "step": 0.01, "default": 0.1, "description": "单位变动成本之一（V2 文档 float[] 按运输方式拆分，默认值教材典型值）" },
+    { "key": "var_cost_rail", "label": "铁路单位变动成本", "type": "float", "unit": "元/吨公里", "min": 0.01, "max": 5, "step": 0.01, "default": 0.05, "description": "单位变动成本之一（V2 文档 float[] 按运输方式拆分，默认值教材典型值）" },
+    { "key": "var_cost_water", "label": "水运单位变动成本", "type": "float", "unit": "元/吨公里", "min": 0.01, "max": 5, "step": 0.01, "default": 0.03, "description": "单位变动成本之一（V2 文档 float[] 按运输方式拆分，默认值教材典型值）" },
+    { "key": "var_cost_air", "label": "航空单位变动成本", "type": "float", "unit": "元/吨公里", "min": 0.01, "max": 5, "step": 0.01, "default": 1.5, "description": "单位变动成本之一（V2 文档 float[] 按运输方式拆分，默认值教材典型值）" },
+    { "key": "batch_qty", "label": "运输批量", "type": "float", "unit": "吨/趟", "min": 1, "max": 30, "step": 1, "default": 10, "description": "单趟装载量，不得超过车辆容量" },
+    { "key": "vehicle_capacity", "label": "车辆容量", "type": "int", "unit": "吨", "min": 5, "max": 30, "step": 1, "default": 30, "description": "装载上限" }
+  ],
+  "outputs": [
+    { "key": "unit_cost", "label": "单位运输成本", "type": "scalar", "unit": "元/吨" },
+    { "key": "cost_curve", "label": "单位成本-批量曲线", "type": "series", "unit": "元/吨" },
+    { "key": "best_mode", "label": "最优运输方式", "type": "scalar" },
+    { "key": "load_rate", "label": "装载率", "type": "gauge", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "load_ok", "expression": "batch_qty <= vehicle_capacity", "message": "运量不得超过车辆容量" }
+  ]
+}

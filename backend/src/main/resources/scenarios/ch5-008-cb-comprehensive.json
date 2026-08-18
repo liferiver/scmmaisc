@@ -1,0 +1,29 @@
+{
+  "chapter": { "code": "CH5", "name": "第五章 跨境物流管理", "sortNo": 5 },
+  "moduleId": "CH5-008",
+  "name": "跨境物流综合方案设计(保税/直邮/海外仓三选一)",
+  "engineKey": "cb-comprehensive",
+  "difficulty": "comprehensive",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "三种跨境模式综合对比、多SKU多目的国方案矩阵、动态模式切换",
+  "description": "给定商家(品类/销量/预算) → 多目的国市场需求预测 → 为每个 SKU×目的国组合选择最优物流模式(轻小低价→直邮/爆款标品→海外仓前置备货/正面清单品类→保税仓) → 模拟运营 → 对比实际成本/时效/客户体验；适合第 5 章综合实训",
+  "deps": ["CH5-001", "CH5-002", "CH5-003", "CH5-004", "CH5-005", "CH5-006", "CH5-007"],
+  "params": [
+    { "key": "sku_count", "label": "SKU数量", "type": "int", "unit": "个", "min": 50, "max": 5000, "step": 50, "default": 500, "description": "多 SKU 组合决策" },
+    { "key": "country_count", "label": "目的国数量", "type": "int", "unit": "个", "min": 1, "max": 4, "step": 1, "default": 3, "description": "多目的国矩阵" },
+    { "key": "target_cost_rate", "label": "目标物流成本率", "type": "float", "min": 0.05, "max": 0.5, "step": 0.01, "default": 0.2, "description": "总物流成本率上限" },
+    { "key": "premium_ratio", "label": "爆款商品占比", "type": "float", "min": 0, "max": 1, "step": 0.05, "default": 0.2, "description": "爆款标品→海外仓前置备货" },
+    { "key": "demand_variance", "label": "需求变动幅度", "type": "float", "min": 0.1, "max": 0.5, "step": 0.05, "default": 0.3, "description": "敏感性分析(需求变动±30%)" }
+  ],
+  "outputs": [
+    { "key": "total_cost", "label": "组合方案总成本", "type": "scalar", "unit": "万元" },
+    { "key": "weighted_delivery", "label": "加权平均时效", "type": "scalar", "unit": "天" },
+    { "key": "mode_mix", "label": "各模式占比", "type": "gauge", "unit": "%" },
+    { "key": "best_mix", "label": "ROI最高的模式组合", "type": "scalar" },
+    { "key": "sensitivity", "label": "敏感性分析(需求变动±30%)", "type": "compare", "unit": "万元" }
+  ],
+  "constraints": [
+    { "name": "cost_rate_ok", "expression": "target_cost_rate <= 0.5", "message": "总物流成本率需小于目标（目标成本率需 ≤ 50%）" }
+  ]
+}

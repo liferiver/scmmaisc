@@ -1,0 +1,46 @@
+{
+  "chapter": { "code": "CH3", "name": "第三章 物流技术与信息系统", "sortNo": 3 },
+  "moduleId": "CH3-008",
+  "name": "物流技术投资ROI对比仿真(条码/RFID/GPS/EDI/AGV)",
+  "engineKey": "roi-compare",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": false,
+  "concept": "技术选型、投资回报率(ROI)、净现值(NPV)、回收期、总拥有成本(TCO)、组合优化",
+  "description": "企业物流现状基线 → 可选技术组合(条码/RFID/GPS/EDI/AGV/WMS升级) → 每项技术一次性投入+量化收益(效率提升/差错降低/人力节省) → 计算 ROI/NPV/回收期 → 预算约束下最大化 ROI 的多技术组合优化",
+  "deps": ["CH3-001", "CH3-002", "CH3-003", "CH3-005"],
+  "params": [
+    { "key": "budget", "label": "技术投资预算", "type": "float", "unit": "万元", "min": 50, "max": 5000, "step": 50, "default": 1000, "description": "总预算上限" },
+    { "key": "cost_barcode", "label": "条码技术投资成本", "type": "float", "unit": "万元", "min": 10, "max": 500, "step": 10, "default": 20, "description": "一次性+年运维（V2 文档 float[] 转写）" },
+    { "key": "cost_rfid", "label": "RFID技术投资成本", "type": "float", "unit": "万元", "min": 10, "max": 1000, "step": 10, "default": 150, "description": "一次性+年运维（V2 文档 float[] 转写）" },
+    { "key": "cost_gps", "label": "GPS技术投资成本", "type": "float", "unit": "万元", "min": 10, "max": 1000, "step": 10, "default": 80, "description": "一次性+年运维（V2 文档 float[] 转写）" },
+    { "key": "cost_edi", "label": "EDI技术投资成本", "type": "float", "unit": "万元", "min": 10, "max": 1000, "step": 10, "default": 120, "description": "一次性+年运维（V2 文档 float[] 转写）" },
+    { "key": "cost_agv", "label": "AGV技术投资成本", "type": "float", "unit": "万元", "min": 10, "max": 2000, "step": 10, "default": 300, "description": "一次性+年运维（V2 文档 float[] 转写）" },
+    { "key": "cost_wms", "label": "WMS升级投资成本", "type": "float", "unit": "万元", "min": 10, "max": 2000, "step": 10, "default": 200, "description": "一次性+年运维（V2 文档 float[] 转写）" },
+    { "key": "eff_barcode", "label": "条码效率提升率", "type": "float", "min": 0.1, "max": 0.6, "step": 0.05, "default": 0.25, "description": "基于 3.1 场景数据（V2 文档 float[] 转写）" },
+    { "key": "eff_rfid", "label": "RFID效率提升率", "type": "float", "min": 0.1, "max": 0.6, "step": 0.05, "default": 0.4, "description": "基于 3.1 场景数据（V2 文档 float[] 转写）" },
+    { "key": "eff_gps", "label": "GPS效率提升率", "type": "float", "min": 0.1, "max": 0.6, "step": 0.05, "default": 0.15, "description": "基于 3.2 场景数据（V2 文档 float[] 转写）" },
+    { "key": "eff_edi", "label": "EDI效率提升率", "type": "float", "min": 0.1, "max": 0.6, "step": 0.05, "default": 0.3, "description": "基于 3.3 场景数据（V2 文档 float[] 转写）" },
+    { "key": "eff_agv", "label": "AGV效率提升率", "type": "float", "min": 0.1, "max": 0.6, "step": 0.05, "default": 0.45, "description": "基于 3.5 场景数据（V2 文档 float[] 转写）" },
+    { "key": "eff_wms", "label": "WMS效率提升率", "type": "float", "min": 0.1, "max": 0.6, "step": 0.05, "default": 0.35, "description": "WMS 升级收益" },
+    { "key": "err_barcode", "label": "条码差错降低率", "type": "float", "min": 0.3, "max": 0.99, "step": 0.05, "default": 0.5, "description": "基于 3.1 场景数据（V2 文档 float[] 转写）" },
+    { "key": "err_rfid", "label": "RFID差错降低率", "type": "float", "min": 0.3, "max": 0.99, "step": 0.05, "default": 0.9, "description": "基于 3.1 场景数据（V2 文档 float[] 转写）" },
+    { "key": "err_gps", "label": "GPS差错降低率", "type": "float", "min": 0.3, "max": 0.99, "step": 0.05, "default": 0.6, "description": "基于 3.2 场景数据（V2 文档 float[] 转写）" },
+    { "key": "err_edi", "label": "EDI差错降低率", "type": "float", "min": 0.3, "max": 0.99, "step": 0.05, "default": 0.95, "description": "基于 3.3 场景数据（V2 文档 float[] 转写）" },
+    { "key": "err_agv", "label": "AGV差错降低率", "type": "float", "min": 0.3, "max": 0.99, "step": 0.05, "default": 0.85, "description": "基于 3.5 场景数据（V2 文档 float[] 转写）" },
+    { "key": "err_wms", "label": "WMS差错降低率", "type": "float", "min": 0.3, "max": 0.99, "step": 0.05, "default": 0.7, "description": "WMS 升级收益" },
+    { "key": "labor_cost", "label": "人力成本", "type": "float", "unit": "万元/人年", "min": 8, "max": 20, "step": 1, "default": 12, "description": "影响人力节省计算" },
+    { "key": "discount_rate", "label": "折现率", "type": "float", "min": 0.05, "max": 0.15, "step": 0.01, "default": 0.1, "description": "NPV 计算参数" },
+    { "key": "eval_years", "label": "评估周期", "type": "int", "unit": "年", "min": 3, "max": 10, "step": 1, "default": 5, "description": "投资评估年限" }
+  ],
+  "outputs": [
+    { "key": "roi_ranking", "label": "各技术ROI排名", "type": "compare", "unit": "%" },
+    { "key": "best_combination", "label": "最优技术组合", "type": "scalar" },
+    { "key": "npv_curve", "label": "累计NPV", "type": "series", "unit": "万元" },
+    { "key": "payback", "label": "回收期", "type": "compare", "unit": "年" },
+    { "key": "sensitivity", "label": "敏感性分析(±20%成本/收益)", "type": "compare" }
+  ],
+  "constraints": [
+    { "name": "budget_ok", "expression": "cost_barcode + cost_rfid + cost_gps + cost_edi + cost_agv + cost_wms <= budget", "message": "各技术总投资需不超过预算" }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "chapter": { "code": "CH11", "name": "第十一章 现代物流与供应链发展", "sortNo": 11 },
+  "moduleId": "CH11-007",
+  "name": "应急物流——人道主义救援仿真",
+  "engineKey": "emergency-logistics",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": true,
+  "concept": "应急物流、人道主义物流、需求动态更新、资源约束、时间窗口、最后一公里救援",
+  "description": "灾害发生(地震/洪水/台风/疫情)→受灾点信息逐步明确(初始模糊)→救援物资调度(食品/水/药品/帐篷)从多个仓库/机场运往受灾点→约束：部分道路中断/运力有限/需求信息滞后/物资有效期→动态决策：物资分配比例/中转点设置/优先救治重伤员→目标：最小化未满足需求(权重×时间延误)+最小伤亡；设置信息不完全条件体验在不确定中做决策",
+  "deps": [],
+  "params": [
+    { "key": "disaster_type", "label": "灾害类型", "type": "enum", "options": [ { "label": "地震", "value": "earthquake" }, { "label": "洪水", "value": "flood" }, { "label": "台风", "value": "typhoon" }, { "label": "疫情", "value": "epidemic" } ], "default": "earthquake", "description": "影响基础设施破坏程度" },
+    { "key": "affected_sites", "label": "受灾点数", "type": "int", "unit": "个", "min": 5, "max": 30, "step": 1, "default": 15, "description": "需要救援的地点" },
+    { "key": "supply_nodes", "label": "仓库/机场数", "type": "int", "unit": "个", "min": 1, "max": 5, "step": 1, "default": 3, "description": "救援物资源点" },
+    { "key": "road_disruption_matrix", "label": "道路中断概率矩阵", "type": "matrix", "description": "各路段中断概率(0-0.5)" },
+    { "key": "transport_capacity", "label": "可用运力", "type": "int", "unit": "辆", "min": 10, "max": 100, "step": 5, "default": 50, "description": "车辆/直升机资源约束" },
+    { "key": "weight_medicine", "label": "物资权重-药品", "type": "float", "min": 0.1, "max": 0.4, "step": 0.05, "default": 0.3, "description": "优先级权重，和=1" },
+    { "key": "weight_water", "label": "物资权重-水", "type": "float", "min": 0.1, "max": 0.4, "step": 0.05, "default": 0.3, "description": "优先级权重，和=1" },
+    { "key": "weight_food", "label": "物资权重-食品", "type": "float", "min": 0.1, "max": 0.4, "step": 0.05, "default": 0.25, "description": "优先级权重，和=1" },
+    { "key": "weight_tent", "label": "物资权重-帐篷", "type": "float", "min": 0.05, "max": 0.2, "step": 0.05, "default": 0.15, "description": "优先级权重，和=1" },
+    { "key": "golden_window_hours", "label": "配送时间窗口", "type": "float", "unit": "小时", "min": 24, "max": 120, "step": 12, "default": 72, "description": "黄金72h，超过后存活率急剧下降" },
+    { "key": "info_update_hours", "label": "信息更新频率", "type": "float", "unit": "小时", "min": 2, "max": 12, "step": 1, "default": 6, "description": "需求/路况更新频率" },
+    { "key": "sim_hours", "label": "仿真时长", "type": "int", "unit": "小时", "min": 24, "max": 240, "step": 24, "default": 120, "description": "救援过程时长（平台补充参数）" }
+  ],
+  "outputs": [
+    { "key": "unmet_demand_series", "label": "未满足需求-时间加权", "type": "series" },
+    { "key": "casualties", "label": "伤亡人数", "type": "scalar", "unit": "人" },
+    { "key": "coverage_compare", "label": "各受灾点物资覆盖度", "type": "compare", "unit": "%" },
+    { "key": "delivery_efficiency", "label": "配送效率", "type": "scalar", "unit": "吨/小时" },
+    { "key": "golden_window_util", "label": "72h黄金窗口利用率", "type": "gauge", "unit": "%" }
+  ],
+  "constraints": [
+    { "name": "weight_sum_ok", "expression": "weight_medicine + weight_water + weight_food + weight_tent <= 1", "message": "物资优先级权重之和需=1（药品>水>食品>帐篷）" },
+    { "name": "capacity_ok", "expression": "transport_capacity >= 10", "message": "运力上限约束（可用运力至少 10 辆）" }
+  ]
+}

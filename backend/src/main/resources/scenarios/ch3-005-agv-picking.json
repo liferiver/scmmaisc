@@ -1,0 +1,31 @@
+{
+  "chapter": { "code": "CH3", "name": "第三章 物流技术与信息系统", "sortNo": 3 },
+  "moduleId": "CH3-005",
+  "name": "智能仓储AGV货到人拣选仿真",
+  "engineKey": "agv-picking",
+  "difficulty": "advanced",
+  "classHours": 2,
+  "isRolePlay": false,
+  "concept": "AGV/AMR自主移动机器人、货到人(G2P)、人到货(P2G)、智能调度、瓶颈漂移",
+  "description": "订单到达 → WMS生成搬运任务 → RCS调度AGV → AGV搬运货架到拣选站 → 拣选员取货 → AGV归还货架 → 多AGV路径规划(避碰/交通管制/充电调度)；从 5 台 AGV 逐步增加观察吞吐量先线性增长→边际递减→达到上限（瓶颈漂移）",
+  "deps": ["CH3-004"],
+  "params": [
+    { "key": "agv_count", "label": "AGV数量", "type": "int", "unit": "台", "min": 5, "max": 200, "step": 5, "default": 50, "description": "机器人台数" },
+    { "key": "workstation_count", "label": "拣选工作站数", "type": "int", "unit": "个", "min": 2, "max": 20, "step": 1, "default": 10, "description": "货到人站台" },
+    { "key": "agv_speed", "label": "AGV速度", "type": "float", "unit": "m/s", "min": 0.5, "max": 3.0, "step": 0.1, "default": 1.2, "description": "移动速度" },
+    { "key": "hit_rate", "label": "货架SKU命中率", "type": "float", "min": 0.3, "max": 0.9, "step": 0.05, "default": 0.6, "description": "一个货架包含订单所需 SKU 的比例" },
+    { "key": "battery_hours", "label": "AGV电池续航", "type": "float", "unit": "h", "min": 4, "max": 10, "step": 0.5, "default": 8, "description": "影响充电频率" },
+    { "key": "order_arrival_rate", "label": "订单到达率", "type": "float", "unit": "单/h", "min": 100, "max": 5000, "step": 100, "default": 1000, "description": "订单密度" },
+    { "key": "conflict_strategy", "label": "路径冲突解决策略", "type": "enum", "default": "priority", "options": [ { "label": "等待", "value": "wait" }, { "label": "绕行", "value": "detour" }, { "label": "优先级", "value": "priority" } ], "description": "交通管制策略" }
+  ],
+  "outputs": [
+    { "key": "throughput", "label": "吞吐量", "type": "scalar", "unit": "单/h" },
+    { "key": "agv_utilization", "label": "AGV平均利用率", "type": "gauge", "unit": "%" },
+    { "key": "wait_time", "label": "订单平均等待时间", "type": "series", "unit": "分钟" },
+    { "key": "optimal_agv_count", "label": "最优AGV数量", "type": "scalar", "unit": "台" },
+    { "key": "conflict_count", "label": "路径冲突次数", "type": "series", "unit": "次" }
+  ],
+  "constraints": [
+    { "name": "capacity_ok", "expression": "agv_count <= workstation_count * 25", "message": "AGV 数量需不超过拣选站可容纳上限（≤ 工作站数×25）" }
+  ]
+}

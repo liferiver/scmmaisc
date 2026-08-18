@@ -1,0 +1,34 @@
+{
+  "chapter": { "code": "CH2", "name": "第二章 物流系统控制", "sortNo": 2 },
+  "moduleId": "CH2-001",
+  "name": "物流系统5S目标协同仿真",
+  "engineKey": "five-s",
+  "difficulty": "basic",
+  "classHours": 1,
+  "isRolePlay": false,
+  "concept": "5S目标(Service/Speed/Space/Savings/Stock)、多目标协同优化、Pareto前沿、目标冲突",
+  "description": "设定5S目标权重 → 资源配置(人力/设备/资金) → 各目标独立优化 → 发现目标冲突(如速度↑ vs 节约↓) → 多目标协同调整 → Pareto前沿搜索 → 最优均衡方案；权重向量变化时最优解沿 Pareto 前沿移动",
+  "deps": [],
+  "params": [
+    { "key": "weight_service", "label": "服务目标权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.25, "description": "5S权重之一（权重和=1，V2 文档 float[5] 转写）" },
+    { "key": "weight_speed", "label": "速度目标权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.25, "description": "5S权重之一（权重和=1，V2 文档 float[5] 转写）" },
+    { "key": "weight_space", "label": "空间目标权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.2, "description": "5S权重之一（权重和=1，V2 文档 float[5] 转写）" },
+    { "key": "weight_savings", "label": "节约目标权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.15, "description": "5S权重之一（权重和=1，V2 文档 float[5] 转写）" },
+    { "key": "weight_stock", "label": "库存目标权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.15, "description": "5S权重之一（权重和=1，V2 文档 float[5] 转写）" },
+    { "key": "stockout_limit", "label": "缺货率上限", "type": "float", "min": 0.01, "max": 0.10, "step": 0.01, "default": 0.05, "description": "服务目标约束" },
+    { "key": "ontime_limit", "label": "准时率下限", "type": "float", "min": 0.90, "max": 0.99, "step": 0.01, "default": 0.95, "description": "速度目标约束" },
+    { "key": "capacity_limit", "label": "库容率上限", "type": "float", "min": 0.70, "max": 0.95, "step": 0.01, "default": 0.85, "description": "空间目标约束" },
+    { "key": "cost_rate_limit", "label": "物流成本率上限", "type": "float", "min": 0.05, "max": 0.20, "step": 0.01, "default": 0.12, "description": "节约目标（占营收%）" },
+    { "key": "turnover_limit", "label": "库存周转率下限", "type": "int", "unit": "次/年", "min": 6, "max": 52, "step": 1, "default": 24, "description": "库存目标" }
+  ],
+  "outputs": [
+    { "key": "s5_score", "label": "5S综合得分", "type": "scalar", "unit": "分" },
+    { "key": "s5_radar", "label": "各S达成率雷达图", "type": "compare", "unit": "%" },
+    { "key": "pareto_frontier", "label": "Pareto前沿", "type": "compare" },
+    { "key": "conflict_matrix", "label": "目标冲突矩阵", "type": "heatmap" }
+  ],
+  "constraints": [
+    { "name": "weight_sum", "expression": "weight_service + weight_speed + weight_space + weight_savings + weight_stock == 1", "message": "5S 权重和必须等于 1" },
+    { "name": "s_minimums", "expression": "each_s >= 最低可接受阈值", "message": "各 S 不得低于最低可接受阈值" }
+  ]
+}
