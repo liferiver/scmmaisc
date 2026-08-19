@@ -20,6 +20,10 @@ vi.mock('echarts', () => ({
   })),
 }))
 
+// 本文件挂载完整 el-table + 弹窗确认等重型组件，低配/高负载环境下单用例可能超过默认 5s，
+// 统一放宽至 20s（确定性用例，超时仅为环境余量，不做任何时序断言）。
+vi.setConfig({ testTimeout: 20000 })
+
 const STORAGE_KEY = 'param_sets'
 
 function output(partial: Partial<OutputValue>): OutputValue {
@@ -115,7 +119,7 @@ describe('CompareView（T038）', () => {
     // 指标选择 + 默认第一个可对比指标（q_star）→ 对比图渲染
     expect(wrapper.find('[data-test="compare-indicator-select"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="compare-chart"]').exists()).toBe(true)
-  })
+  }, 15000)
 
   it('取消勾选至不足 2 组：提示「请勾选至少 2 组方案」且隐藏对比区', async () => {
     seedStorage([set('a1', '方案A', 1000), set('b2', '方案B', 800)])
