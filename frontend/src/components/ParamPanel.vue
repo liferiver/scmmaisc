@@ -53,6 +53,17 @@ watch(
         const n = Number(raw)
         if (Number.isFinite(n)) payload[p.key] = n
       }
+      if (p.type === 'matrix' || p.type === 'timeseries') {
+        // 空矩阵 = 可选未填：省略 key，由后端执行器按缺省合成（与可选矩阵设计一致）
+        if (matrixEmpty(p)) {
+          delete payload[p.key]
+        } else {
+          // 单元格归一化为 number（后端 matrixParam 要求 JSON 数值）
+          payload[p.key] = matrixValue(p).map((row) =>
+            row.map((cell) => (typeof cell === 'string' && cell !== '' ? Number(cell) : cell)),
+          )
+        }
+      }
     }
     // 与父级当前值一致时跳过（父级回写同样会触发本 watcher，避免无限递归更新）
     if (JSON.stringify(payload) === JSON.stringify(props.modelValue)) return
@@ -85,12 +96,20 @@ function validate(p: Parameter, value: unknown): string {
     return ''
   }
   if (p.type === 'matrix' || p.type === 'timeseries') {
-    const rows = Array.isArray(value) ? value : []
+    // 空矩阵（[]/全空行）视为可选未填：后端按缺省合成，前端无需报错
+    if (matrixEmpty(p)) return ''
+    const rows = matrixValue(p)
+    let cols = 0
     for (const row of rows) {
       if (!Array.isArray(row)) return '必须为数字矩阵'
+      if (cols === 0) cols = row.length
+      if (row.length !== cols) return '各行列数必须一致'
       for (const cell of row) {
         if (cell === null || cell === undefined || cell === '') return '必填'
-        if (!Number.isFinite(Number(cell))) return '必须为数字'
+        const n = Number(cell)
+        if (!Number.isFinite(n)) return '必须为数字'
+        if (p.min !== undefined && n < p.min) return `不能小于 ${p.min}`
+        if (p.max !== undefined && n > p.max) return `不能大于 ${p.max}`
       }
     }
     return ''
@@ -225,8 +244,58 @@ function doReset() {
 function defaultFor(type: string): unknown {
   if (type === 'bool') return false
   if (type === 'dist') return {}
-  if (type === 'matrix' || type === 'timeseries') return [[]]
+  if (type === 'matrix' || type === 'timeseries') return []
   return ''
+}
+
+/** 矩阵参数最大列数（行数由后端按场景约束，列上限仅防误操作）。 */
+const MATRIX_MAX_COLS = 20
+
+/** 当前矩阵值（只读；未填时为 []，不写回 form）。 */
+function matrixValue(p: Parameter): unknown[][] {
+  const v = form[p.key]
+  return Array.isArray(v) ? (v as unknown[][]) : []
+}
+
+/** 当前矩阵行（写模式：form 无 key 时初始化为空数组）。 */
+function matrixRows(p: Parameter): unknown[][] {
+  const v = form[p.key]
+  if (!Array.isArray(v)) {
+    form[p.key] = []
+  }
+  return form[p.key] as unknown[][]
+}
+
+/** 空矩阵判定：[]、[[]] 或全部为空行均视为可选未填。 */
+function matrixEmpty(p: Parameter): boolean {
+  const rows = matrixValue(p)
+  return rows.length === 0 || rows.every((r) => !Array.isArray(r) || r.length === 0)
+}
+
+function matrixCols(p: Parameter): number {
+  return matrixValue(p)[0]?.length ?? 0
+}
+
+function matrixAddRow(p: Parameter) {
+  matrixRows(p).push(new Array(matrixCols(p)).fill(''))
+}
+
+function matrixDelRow(p: Parameter) {
+  const rows = matrixRows(p)
+  if (rows.length > 1) rows.pop()
+}
+
+function matrixAddCol(p: Parameter) {
+  const rows = matrixRows(p)
+  if (rows.length === 0) rows.push([])
+  for (const row of rows) (row as unknown[]).push('')
+}
+
+function matrixDelCol(p: Parameter) {
+  const rows = matrixRows(p)
+  if (matrixCols(p) > 1) {
+    for (const row of rows) (row as unknown[]).pop()
+  }
 }
 
 function clone(v: unknown): unknown {
@@ -282,11 +351,20 @@ function submit() {
             />
           </div>
         </div>
-        <!-- matrix / timeseries：可编辑表格 -->
+        <!-- matrix / timeseries：可编辑表格（工具栏增删行/列，空矩阵=可选未填） -->
         <div v-else-if="p.type === 'matrix' || p.type === 'timeseries'" class="param-control matrix-wrap" :data-test="`param-${p.key}`">
-          <el-table :data="form[p.key] as unknown[][]" size="small" border>
+          <div class="matrix-toolbar">
+            <span class="matrix-shape" :data-test="`matrix-shape-${p.key}`">{{ matrixValue(p).length }} 行 × {{ matrixCols(p) }} 列</span>
+            <el-button-group size="small">
+              <el-button size="small" :data-test="`matrix-add-row-${p.key}`" @click="matrixAddRow(p)">添加一行</el-button>
+              <el-button size="small" :data-test="`matrix-del-row-${p.key}`" :disabled="matrixValue(p).length <= 1" @click="matrixDelRow(p)">删除末行</el-button>
+              <el-button size="small" :data-test="`matrix-add-col-${p.key}`" :disabled="matrixCols(p) >= MATRIX_MAX_COLS" @click="matrixAddCol(p)">添加一列</el-button>
+              <el-button size="small" :data-test="`matrix-del-col-${p.key}`" :disabled="matrixCols(p) <= 1" @click="matrixDelCol(p)">删除末列</el-button>
+            </el-button-group>
+          </div>
+          <el-table :data="matrixValue(p)" size="small" border>
             <el-table-column
-              v-for="(_, ci) in (form[p.key] as unknown[][])[0] ?? []"
+              v-for="(_, ci) in matrixCols(p)"
               :key="ci"
               :label="`列 ${ci + 1}`"
             >
@@ -328,6 +406,17 @@ function submit() {
 }
 .matrix-wrap {
   width: 100%;
+}
+.matrix-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.matrix-shape {
+  color: #909399;
+  font-size: 12px;
 }
 .param-desc {
   color: #909399;

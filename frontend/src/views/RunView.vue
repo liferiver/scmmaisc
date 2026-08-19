@@ -37,7 +37,7 @@ const detail = computed(() => scenarioStore.current)
 function defaultFor(type: string): unknown {
   if (type === 'bool') return false
   if (type === 'dist') return {}
-  if (type === 'matrix' || type === 'timeseries') return [[]]
+  if (type === 'matrix' || type === 'timeseries') return []
   return ''
 }
 

@@ -17,7 +17,7 @@
     { "key": "weight_delivery", "label": "交付维度权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.15, "description": "六维权重之一（权重和=1，V2 文档 float[6] 转写）" },
     { "key": "weight_cost", "label": "成本维度权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.2, "description": "六维权重之一（权重和=1，V2 文档 float[6] 转写）" },
     { "key": "weight_environment", "label": "环保维度权重", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.1, "description": "六维权重之一（权重和=1，V2 文档 float[6] 转写）" },
-    { "key": "supplier_scores", "label": "各供应商维度得分", "type": "matrix", "description": "每行一个候选供应商：技术/质量/响应/交付/成本/环保 六列得分（0-100，V2 文档 float[] 转写为矩阵）" },
+        { "key": "supplier_scores", "label": "各供应商维度得分", "type": "matrix", "min": 0, "max": 100, "default": [ [ 85, 90, 80, 88, 75, 92 ], [ 78, 82, 85, 70, 88, 60 ], [ 92, 75, 70, 82, 65, 85 ], [ 70, 88, 76, 90, 82, 74 ], [ 88, 65, 92, 76, 70, 80 ], [ 76, 92, 82, 65, 90, 78 ], [ 82, 70, 88, 92, 78, 66 ], [ 65, 85, 90, 74, 86, 82 ], [ 90, 78, 66, 85, 72, 88 ], [ 72, 86, 78, 80, 92, 70 ] ], "description": "每行一个候选供应商：技术/质量/响应/交付/成本/环保 六列得分（0-100，V2 文档 float[] 转写为矩阵；默认 10 行与 candidate_count 一致，可增删行/列后修改）" },
     { "key": "pass_threshold", "label": "认证标准阈值", "type": "float", "unit": "分", "min": 60, "max": 90, "step": 1, "default": 75, "description": "综合得分低于阈值淘汰" },
     { "key": "sample_pass_rate", "label": "样品合格率", "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.85, "description": "样品测试通过概率" },
     { "key": "audit_items", "label": "现场审核项数", "type": "int", "unit": "项", "min": 10, "max": 50, "step": 1, "default": 25, "description": "审核清单长度，影响审核耗时" }

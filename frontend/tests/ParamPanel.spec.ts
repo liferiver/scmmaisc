@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import ParamPanel from '@/components/ParamPanel.vue'
 import type { Parameter, ParamGroupConstraint } from '@/types'
@@ -236,5 +236,127 @@ describe('ParamPanel 语义化标量组约束（V11）', () => {
     await nextTick()
     expect(wrapper.find('[data-test="param-group-error-budget_ok"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="run-submit"]').attributes('disabled')).toBeDefined()
+  })
+})
+
+describe('ParamPanel 矩阵参数编辑（CH1-001 无法输入缺陷修复）', () => {
+  const matrixParam: Parameter = { key: 'scores', label: '得分', type: 'matrix' }
+
+  it('空矩阵：渲染工具栏与空表、可提交，payload 省略该 key（后端合成缺省）', async () => {
+    const params: Parameter[] = [
+      { key: 'count', label: '数量', type: 'int', default: 5 },
+      matrixParam,
+    ]
+    const wrapper = mount(ParamPanel, {
+      props: { params, modelValue: { count: 5, scores: [] } },
+    })
+    await flushPromises()
+    expect(wrapper.find('[data-test="matrix-shape-scores"]').text()).toBe('0 行 × 0 列')
+    expect(wrapper.findAll('[data-test="param-scores"] table input')).toHaveLength(0)
+    // 无行/无列时删除按钮禁用，但可提交（空矩阵 = 可选未填）
+    expect(wrapper.find('[data-test="matrix-del-row-scores"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.find('[data-test="matrix-del-col-scores"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.find('[data-test="run-submit"]').attributes('disabled')).toBeUndefined()
+
+    // 修改其他参数触发 emit：payload 不含空矩阵 key
+    await wrapper.find('[data-test="param-count"] input').setValue('6')
+    await nextTick()
+    const emitted = wrapper.emitted('update:modelValue')
+    expect(emitted).toBeTruthy()
+    const payload = emitted![emitted!.length - 1][0] as Record<string, unknown>
+    expect(payload.count).toBe(6)
+    expect('scores' in payload).toBe(false)
+  })
+
+  it('旧形态 [[]] 视为可选未填：不报错且 payload 省略', async () => {
+    const wrapper = mount(ParamPanel, {
+      props: { params: [matrixParam], modelValue: { scores: [[]] } },
+    })
+    await flushPromises()
+    expect(wrapper.find('[data-test="param-error-scores"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="run-submit"]').attributes('disabled')).toBeUndefined()
+    await wrapper.find('[data-test="run-submit"]').trigger('click')
+    expect(wrapper.emitted('submit')).toHaveLength(1)
+  })
+
+  it('添加行/列后可编辑单元格，payload 为数值矩阵', async () => {
+    const wrapper = mount(ParamPanel, {
+      props: { params: [matrixParam], modelValue: {} },
+    })
+    await flushPromises()
+    await wrapper.find('[data-test="matrix-add-row-scores"]').trigger('click')
+    await nextTick()
+    expect(wrapper.find('[data-test="matrix-shape-scores"]').text()).toBe('1 行 × 0 列')
+    await wrapper.find('[data-test="matrix-add-col-scores"]').trigger('click')
+    await wrapper.find('[data-test="matrix-add-col-scores"]').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('[data-test="matrix-shape-scores"]').text()).toBe('1 行 × 2 列')
+
+    const inputs = wrapper.findAll('[data-test="param-scores"] table input')
+    expect(inputs).toHaveLength(2)
+    await inputs[0].setValue('10')
+    await inputs[1].setValue('20')
+    await nextTick()
+    const emitted = wrapper.emitted('update:modelValue')
+    expect(emitted).toBeTruthy()
+    const payload = emitted![emitted!.length - 1][0] as Record<string, unknown>
+    expect(payload.scores).toEqual([[10, 20]])
+    expect(wrapper.find('[data-test="run-submit"]').attributes('disabled')).toBeUndefined()
+  })
+
+  it('单元格非数字：即时红字且不可提交', async () => {
+    const p: Parameter = { key: 'scores', label: '得分', type: 'matrix', default: [[80, 90]] }
+    const wrapper = mount(ParamPanel, {
+      props: { params: [p], modelValue: { scores: [[80, 90]] } },
+    })
+    await flushPromises()
+    const inputs = wrapper.findAll('[data-test="param-scores"] table input')
+    await inputs[0].setValue('abc')
+    await nextTick()
+    expect(wrapper.find('[data-test="param-error-scores"]').text()).toContain('必须为数字')
+    expect(wrapper.find('[data-test="run-submit"]').attributes('disabled')).toBeDefined()
+  })
+
+  it('单元格越界（声明 min/max 时）：即时红字且不可提交', async () => {
+    const p: Parameter = { key: 'scores', label: '得分', type: 'matrix', min: 0, max: 100, default: [[80]] }
+    const wrapper = mount(ParamPanel, {
+      props: { params: [p], modelValue: { scores: [[80]] } },
+    })
+    await flushPromises()
+    const inputs = wrapper.findAll('[data-test="param-scores"] table input')
+    await inputs[0].setValue('150')
+    await nextTick()
+    expect(wrapper.find('[data-test="param-error-scores"]').text()).toContain('不能大于 100')
+    expect(wrapper.find('[data-test="run-submit"]').attributes('disabled')).toBeDefined()
+    await inputs[0].setValue('50')
+    await nextTick()
+    expect(wrapper.find('[data-test="param-error-scores"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="run-submit"]').attributes('disabled')).toBeUndefined()
+  })
+
+  it('删除末行/末列在边界禁用，增删后形状同步且值可回写', async () => {
+    const p: Parameter = { key: 'm', label: '矩阵', type: 'matrix', default: [[1, 2], [3, 4]] }
+    const wrapper = mount(ParamPanel, {
+      props: { params: [p], modelValue: { m: [[1, 2], [3, 4]] } },
+    })
+    await flushPromises()
+    expect(wrapper.find('[data-test="matrix-shape-m"]').text()).toBe('2 行 × 2 列')
+    expect(wrapper.find('[data-test="matrix-del-row-m"]').attributes('disabled')).toBeUndefined()
+    await wrapper.find('[data-test="matrix-del-row-m"]').trigger('click')
+    await nextTick()
+    expect(wrapper.find('[data-test="matrix-shape-m"]').text()).toBe('1 行 × 2 列')
+    expect(wrapper.find('[data-test="matrix-del-row-m"]').attributes('disabled')).toBeDefined()
+    await wrapper.find('[data-test="matrix-del-col-m"]').trigger('click')
+    await nextTick()
+    expect(wrapper.find('[data-test="matrix-shape-m"]').text()).toBe('1 行 × 1 列')
+    expect(wrapper.find('[data-test="matrix-del-col-m"]').attributes('disabled')).toBeDefined()
+    // 剩余单格修改后回写
+    const inputs = wrapper.findAll('[data-test="param-m"] table input')
+    await inputs[0].setValue('7')
+    await nextTick()
+    const emitted = wrapper.emitted('update:modelValue')
+    expect(emitted).toBeTruthy()
+    const payload = emitted![emitted!.length - 1][0] as Record<string, unknown>
+    expect(payload.m).toEqual([[7]])
   })
 })
