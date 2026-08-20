@@ -370,6 +370,7 @@ class DiscussionOrchestratorTest {
         p.setCaseLibrary("[\"教材案例：制造业采购批量决策\"]");
         p.setTheoryLibrary("[\"EOQ 模型推导与假设边界\"]");
         p.setSource("MANUAL");
+        p.setUpdatedAt(LocalDateTime.now());
         profileMapper.insert(p);
     }
 

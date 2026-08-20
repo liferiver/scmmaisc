@@ -1,8 +1,16 @@
 package com.scmmaisc.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.scmmaisc.entity.DiscussionConclusion;
+import com.scmmaisc.entity.DiscussionQuestion;
+import com.scmmaisc.entity.DiscussionSession;
+import com.scmmaisc.entity.DiscussionUtterance;
 import com.scmmaisc.entity.SimulationLog;
 import com.scmmaisc.entity.SimulationRun;
+import com.scmmaisc.mapper.DiscussionConclusionMapper;
+import com.scmmaisc.mapper.DiscussionQuestionMapper;
+import com.scmmaisc.mapper.DiscussionSessionMapper;
+import com.scmmaisc.mapper.DiscussionUtteranceMapper;
 import com.scmmaisc.mapper.SimulationLogMapper;
 import com.scmmaisc.mapper.SimulationRunMapper;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +24,9 @@ import java.util.List;
 
 /**
  * 日志保留策略（T039，宪法 IV）：每日凌晨清理 30 天前的历史运行记录，
- * 并级联删除其模拟日志。simulation_log 外键已设 ON DELETE CASCADE，
- * 此处先显式删除日志再删运行，保证无外键环境（如部分测试库）下行为一致。
+ * 并级联删除其模拟日志与讨论数据（T049：conclusion → question → utterance → session → run）。
+ * 外键均已设 ON DELETE CASCADE，此处先显式删除子表再删运行，
+ * 保证无外键环境（如部分测试库）下行为一致。
  */
 @Slf4j
 @Service
@@ -29,6 +38,10 @@ public class LogRetentionService {
 
     private final SimulationRunMapper runMapper;
     private final SimulationLogMapper logMapper;
+    private final DiscussionSessionMapper sessionMapper;
+    private final DiscussionUtteranceMapper utteranceMapper;
+    private final DiscussionQuestionMapper questionMapper;
+    private final DiscussionConclusionMapper conclusionMapper;
 
     /** 每日 03:00 清理过期运行记录（可被测试直接调用核心逻辑）。 */
     @Scheduled(cron = "0 0 3 * * *")
@@ -58,6 +71,19 @@ public class LogRetentionService {
         }
         List<Long> ids = expired.stream().map(SimulationRun::getId).toList();
         logMapper.delete(new LambdaQueryWrapper<SimulationLog>().in(SimulationLog::getRunId, ids));
+        // 显式级联删除讨论数据（依赖顺序：结论 → 插话 → 发言 → 会话；再删运行）
+        List<Long> sessionIds = sessionMapper.selectList(
+                        new LambdaQueryWrapper<DiscussionSession>().in(DiscussionSession::getRunId, ids))
+                .stream().map(DiscussionSession::getId).toList();
+        if (!sessionIds.isEmpty()) {
+            conclusionMapper.delete(new LambdaQueryWrapper<DiscussionConclusion>()
+                    .in(DiscussionConclusion::getSessionId, sessionIds));
+            questionMapper.delete(new LambdaQueryWrapper<DiscussionQuestion>()
+                    .in(DiscussionQuestion::getSessionId, sessionIds));
+            utteranceMapper.delete(new LambdaQueryWrapper<DiscussionUtterance>()
+                    .in(DiscussionUtterance::getSessionId, sessionIds));
+            sessionMapper.deleteBatchIds(sessionIds);
+        }
         runMapper.deleteBatchIds(ids);
         return ids.size();
     }

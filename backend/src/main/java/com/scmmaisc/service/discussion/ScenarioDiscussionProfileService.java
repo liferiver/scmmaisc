@@ -166,12 +166,18 @@ public class ScenarioDiscussionProfileService implements ApplicationRunner {
             if (idx < 0) {
                 continue;
             }
-            // 链路内前序/后续知识点（按场景名引用，数据驱动零虚构）
+            // 链路内前序/后续知识点（按场景名引用，数据驱动零虚构；未装载场景跳过）
             for (int i = 0; i < idx; i++) {
-                prev.add(nameOf(chain.get(i)));
+                String name = nameOf(chain.get(i));
+                if (name != null) {
+                    prev.add(name);
+                }
             }
             for (int i = idx + 1; i < chain.size(); i++) {
-                next.add(nameOf(chain.get(i)));
+                String name = nameOf(chain.get(i));
+                if (name != null) {
+                    next.add(name);
+                }
             }
             break;
         }
@@ -211,13 +217,13 @@ public class ScenarioDiscussionProfileService implements ApplicationRunner {
         }
     }
 
-    /** concept 按顿号/逗号拆分 → 概念标签（去空去重）。 */
+    /** concept 按顿号/中文逗号/分号拆分 → 概念标签（去空去重；数学表达式如 (s,Q) 的 ASCII 逗号不拆分）。 */
     private static List<String> splitConcept(String concept) {
         if (concept == null || concept.isBlank()) {
             return List.of();
         }
         Set<String> tags = new LinkedHashSet<>();
-        for (String part : concept.split("[、,，;；]")) {
+        for (String part : concept.split("[、，;；]")) {
             String t = part.trim();
             if (!t.isEmpty()) {
                 tags.add(t);

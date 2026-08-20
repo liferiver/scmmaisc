@@ -12,7 +12,8 @@
 - **语义化约束组**：纯求和比较约束（如六维权重和=1）由后端提取为 constraintGroups 下发，前端按组实时合计校验、违规不可提交，服务端执行器 validate 兑底（FR-005）
 - **方案管理**：参数快照 + 结果保存到浏览器 localStorage，任意两组同指标并排对比（FR-011）
 - **报告导出**：CSV（参数快照 + 全部指标）与 PNG（图表）两种格式，可直接提交作业（FR-012）
-- **安全与健壮**：clientId 白名单、params 结构守卫、错误信息不泄露内部细节、30 天日志自动清理
+- **多智能体研讨**（三期）：仿真完成后一键发起五轮四人组讨论（柳经理·实操 / 霍教授·理论 / 景同学·计算 / 钟同学·提问），角色化发言 + 学生插话互动 + 三维结论卡片（理论/实操/前沿各 4 要素），历史回看 + Markdown 实验报告导出；84 场景讨论配置自动生成 + 人工覆盖（跨章知识图谱，引用零虚构）
+- **安全与健壮**：clientId 白名单、params 结构守卫、错误信息不泄露内部细节、30 天日志自动清理（含讨论数据级联清理）
 
 ## 技术架构
 
@@ -24,19 +25,23 @@
                                 │ REST（/api，Vite 代理）
 ┌───────────────────────────────▼───────────────────────────────────────────────┐
 │                    后端（Spring Boot 3.3.5 + Java 17）                          │
-│  Controller 层：章节/场景/运行/健康（契约 C1–C8）                                │
+│   Controller 层：章节/场景/运行/健康/讨论（契约 C1–C8 + D1–D8）                       │
 │  Service 层：RunService（状态机 RUNNING→COMPLETED/CANCELLED/FAILED）、           │
 │              ScenarioDataLoader、SimLogService、LogRetentionService（@Scheduled）、│
-│              GroupConstraintExtractor（语义化求和组约束提取）                      │
+│              GroupConstraintExtractor（语义化求和组约束提取）、                     │
+│              discussion：DiscussionService/DiscussionOrchestrator（五轮编排）       │
+│              + PromptBuilder/ConclusionParser + ScenarioDiscussionProfileService      │
 │  Engine 层（纯 Java 可独立测试）：SimulationEngine + 84 个 ScenarioExecutor       │
 │              + StepAggregator + RandomSource(seed) + ExecutorRegistry             │
-│  MyBatis-Plus → MySQL 8（chapter / scenario / simulation_run / simulation_log） │
+│  LLM 层：LlmClient 接口（HttpLlmClient 真实 / StubLlmClient 确定性演示）          │
+│  MyBatis-Plus → MySQL 8（chapter / scenario / simulation_run / simulation_log /   │
+│              discussion_session / utterance / question / conclusion / profile）    │
 └────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 - 前端：Vue 3.4 + Vite 5 + TypeScript（strict）+ Element Plus 2.7 + ECharts 5 + Pinia + Vitest
 - 后端：Spring Boot 3.3.5 + MyBatis-Plus + MySQL 8（测试用 H2 MySQL 模式）
-- 测试：后端 `mvn test`（60 用例：引擎算例/复现/极端参数/84 场景冒烟 + 服务层 + MockMvc 契约）；前端 `npm run test`（70 用例：组件与 stores）+ `npm run build`（vue-tsc 类型检查）
+- 测试：后端 `mvn test`（126 用例：引擎算例/复现/极端参数/84 场景冒烟 + 服务层 + MockMvc 契约 + 五轮讨论编排/插话/知识图谱）；前端 `npm run test`（108 用例：组件与 stores）+ `npm run build`（vue-tsc 类型检查）
 
 ## 目录结构
 
@@ -45,26 +50,31 @@
 │   ├── Dockerfile              # 多阶段构建：maven 打包 → JRE 运行
 │   ├── .dockerignore
 │   ├── src/main/java/com/scmmaisc/
-│   │   ├── controller/        # C1–C8 REST 接口
+│   │   ├── controller/        # C1–C8 REST 接口 + D1–D8 讨论接口
 │   │   ├── service/           # 运行/场景/日志/保留清理
+│   │   ├── service/discussion/# 讨论会话/五轮编排/Prompt/结论解析/知识图谱配置
+│   │   ├── llm/               # LlmClient 接口 + HttpLlmClient + StubLlmClient
 │   │   ├── engine/            # 引擎框架 + executor/ 84 个场景执行器 + StepAggregator
 │   │   ├── common/            # 统一响应、错误码、异常处理、ParamsGuard
 │   │   ├── entity/ mapper/ config/
 │   └── src/main/resources/
-│       ├── db/schema.sql      # 幂等建表
-│       └── scenarios/*.json   # 84 个场景定义（启动装载）
+│       ├── db/schema.sql      # 幂等建表（含 5 张讨论表）
+│       ├── scenarios/*.json   # 84 个场景定义（启动装载）
+│       ├── discussion-profiles/*.json  # 场景讨论配置人工覆盖（AUTO 生成的替代）
+│       └── prompts/personas/*.md       # 四角色 system prompt 文案
 ├── frontend/
 │   ├── Dockerfile              # 多阶段构建：vue-tsc + vite 打包 → nginx 运行
 │   ├── nginx.conf              # 静态服务 + history 回退 + /api 代理
 │   ├── .dockerignore
-│   ├── src/views/             # 目录 / 场景详情 / 运行 / 方案对比
-│   ├── src/components/        # ParamPanel / StepTimeline / OutputChart / ExportButton / SavePlanDialog
-│   ├── src/stores/            # scenarioStore / runStore / planStore
-│   ├── src/api/  src/utils/  src/types/
-│   └── tests/                 # Vitest 组件与 stores 测试
+│   ├── src/views/             # 目录 / 场景详情 / 运行 / 方案对比 / 讨论 / 讨论历史
+│   ├── src/components/        # ParamPanel / StepTimeline / OutputChart / ExportButton / SavePlanDialog / UtteranceList / ConclusionCards
+│   ├── src/stores/            # scenarioStore / runStore / planStore / discussionStore
+│   ├── src/api/  src/utils/  src/types/  src/router/
+│   └── tests/                 # Vitest 组件与 stores 测试（含讨论/历史视图）
 ├── docker-compose.yml           # 一键编排：mysql + backend + frontend
 ├── .env.example                 # 环境变量模板（复制为 .env 使用）
 ├── specs/001-scm-sim-platform/  # 需求/契约/任务/验收（Spec-Driven 工件）
+├── specs/002-multi-agent-interaction/  # 三期多智能体研讨（Spec-Driven 工件）
 └── docs/                        # 教学场景列表 V2、教学大纲、学生使用说明
 ```
 
@@ -80,7 +90,20 @@ CREATE DATABASE scmmaisc CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 表结构由后端启动时按 `schema.sql` 幂等创建；84 个场景由 `ScenarioDataLoader` 自动装载（无需手工导入）。
 
-### 2. 启动后端（默认 8080 端口）
+### 2. 配置 LLM（多智能体讨论，可跳过）
+
+默认 **stub 模式**（`LLM_STUB=true`）：无需密钥、无网络调用，四角色发言为确定性预设文本，可完整演示五轮讨论/插话/历史导出，适合课堂离线演示。
+
+接入真实模型（OpenAI 兼容接口）时设置：
+
+```powershell
+$env:LLM_STUB="false"
+$env:LLM_BASE_URL="http://localhost:8000/v1"   # 兼容 /chat/completions 的服务地址
+$env:LLM_MODEL="qwen2.5-72b-instruct"
+$env:LLM_API_KEY="你的密钥"                      # 密钥只走环境变量，不写入任何文件
+```
+
+### 3. 启动后端（默认 8080 端口）
 
 ```powershell
 cd backend
@@ -93,7 +116,7 @@ mvn spring-boot:run
 预期：启动日志出现 `Scenarios loaded: 84`；`GET http://localhost:8080/api/health` 返回 `{"code":0,...,"data":{"status":"UP","db":"UP"}}`。
 若 8080 被占用，可用 `mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8081` 换端口，并同步修改前端代理目标。
 
-### 3. 启动前端
+### 4. 启动前端
 
 ```powershell
 cd frontend
@@ -103,7 +126,15 @@ npm run dev
 
 访问 http://localhost:5173（Vite 代理 `/api` → 8080）。使用说明见 [docs/学生使用说明.md](docs/学生使用说明.md)。
 
-### 4. 运行测试
+### 多智能体研讨使用指引（三期）
+
+1. **开始讨论**：仿真运行完成后点击「开始讨论」，异步产出五轮发言（现象解读 → 深度剖析 → 跨章连接 → 前沿延伸 → 三维收敛），可随时查看进度；多人并发时自动排队
+2. **插话互动**：第 2 轮起可在「我也想问…」输入框提交问题（≤200 字），下一轮全部角色优先回应，同辈角色（景/钟）优先
+3. **放弃**：讨论进行中可主动放弃；失败时已生成内容保留，可重新发起
+4. **回看与导出**：「讨论历史」列表回看任意已完成讨论；「导出报告」生成 Markdown 实验报告附录（场景信息 + 五轮发言 + 三维结论 12 要素 + 投票结果）
+5. **知识图谱**：跨章连接轮自动引用该场景的前序知识/后续延伸（84 场景自动生成 + 高活跃场景人工覆盖，引用零虚构）
+
+### 5. 运行测试
 
 ```powershell
 cd backend; mvn test        # 引擎算例/复现/极端参数 + 服务层 + MockMvc 契约
@@ -172,3 +203,4 @@ docker compose up -d --build     # 代码变更后重建镜像并热替换
 - 教学大纲：[docs/电商物流与供应链管理教学大纲.md](docs/电商物流与供应链管理教学大纲.md)
 - 学生使用说明：[docs/学生使用说明.md](docs/学生使用说明.md)
 - Spec 工件：[specs/001-scm-sim-platform/](specs/001-scm-sim-platform/)（spec.md / contracts/api.md / ui.md / data-model.md / tasks.md / quickstart.md）
+- 三期讨论 Spec 工件：[specs/002-multi-agent-interaction/](specs/002-multi-agent-interaction/)（spec.md / plan.md / research.md / contracts/discussions.md / tasks.md / quickstart.md）

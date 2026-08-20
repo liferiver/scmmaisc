@@ -4,6 +4,8 @@ import com.scmmaisc.entity.Scenario;
 import com.scmmaisc.mapper.ChapterMapper;
 import com.scmmaisc.mapper.ScenarioDiscussionProfileMapper;
 import com.scmmaisc.mapper.ScenarioMapper;
+import com.scmmaisc.mapper.SimulationLogMapper;
+import com.scmmaisc.mapper.SimulationRunMapper;
 import com.scmmaisc.service.discussion.ScenarioDiscussionProfileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,8 +44,17 @@ class ScenarioDiscussionProfileTest {
     @Autowired
     private ScenarioDiscussionProfileMapper profileMapper;
 
+    @Autowired
+    private SimulationRunMapper runMapper;
+
+    @Autowired
+    private SimulationLogMapper logMapper;
+
     @BeforeEach
     void setUp() throws Exception {
+        // 依赖顺序清理（宪法 II）：先删日志/运行（外键引用 scenario），再删配置/场景/章节
+        logMapper.delete(null);
+        runMapper.delete(null);
         profileMapper.delete(null);
         scenarioMapper.delete(null);
         chapterMapper.delete(null);
