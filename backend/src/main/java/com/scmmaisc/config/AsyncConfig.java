@@ -21,4 +21,19 @@ public class AsyncConfig {
         executor.initialize();
         return executor;
     }
+
+    /**
+     * 讨论调度线程池（FR-015 有界并发，research.md §3）：core=max=4 天然实现
+     * 「同时最多 4 个并行」，超出进入队列等待（前端展示排队位置），队列上限 200。
+     */
+    @Bean("discussionExecutor")
+    public ThreadPoolTaskExecutor discussionExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(4);
+        executor.setQueueCapacity(200);
+        executor.setThreadNamePrefix("discussion-");
+        executor.initialize();
+        return executor;
+    }
 }

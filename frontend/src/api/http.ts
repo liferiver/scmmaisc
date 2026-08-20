@@ -60,9 +60,9 @@ export async function get<T>(url: string, params?: object): Promise<T> {
   }
 }
 
-export async function post<T>(url: string, body?: object): Promise<T> {
+export async function post<T>(url: string, body?: object, params?: object): Promise<T> {
   try {
-    const resp = await http.post<ApiResult<T>>(url, body)
+    const resp = await http.post<ApiResult<T>>(url, body, { params })
     return resp.data.data
   } catch (err) {
     return handleError(err)

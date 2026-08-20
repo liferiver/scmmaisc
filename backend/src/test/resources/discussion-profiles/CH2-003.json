@@ -1,0 +1,10 @@
+{
+  "moduleId": "CH2-003",
+  "conceptTags": ["测试覆盖：经济订货批量"],
+  "chapterSection": "第二章 物流系统控制",
+  "prevKnowledge": ["测试前序：需求预测"],
+  "nextExtension": ["测试延伸：供应链协同"],
+  "discussionStarters": ["测试人工覆盖：比较 Q* 与整批订货的成本差异"],
+  "caseLibrary": ["柳经理：京东智能补货案例"],
+  "theoryLibrary": ["霍教授：EOQ 推导"]
+}

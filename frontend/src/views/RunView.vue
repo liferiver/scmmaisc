@@ -74,6 +74,17 @@ function onRerun() {
   runStore.reset()
 }
 
+/** 三期 US1：基于本次 COMPLETED 运行发起多智能体讨论（SC-001 入口 ≤3 次点击）。 */
+function goDiscussion() {
+  if (!runStore.runId) return
+  router.push(`/scenarios/${props.moduleId}/discussion?runId=${runStore.runId}`)
+}
+
+/** 四期 US4：讨论历史列表页（D6）。 */
+function goHistory() {
+  router.push('/discussions')
+}
+
 function backToDetail() {
   runStore.reset()
   router.push(`/scenarios/${props.moduleId}`)
@@ -208,6 +219,10 @@ onMounted(load)
                 <el-tag type="success">运行完成</el-tag>
                 <span class="result-info">{{ durationText }}</span>
                 <ExportButton :result="runStore.result" :scenario-name="detail.name" />
+                <el-button size="small" type="primary" data-test="start-discussion" @click="goDiscussion">
+                  开始讨论
+                </el-button>
+                <el-button size="small" data-test="history-discussions" @click="goHistory">讨论历史</el-button>
                 <el-button size="small" type="primary" plain data-test="save-plan" @click="saveDialogVisible = true">
                   保存方案
                 </el-button>

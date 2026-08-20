@@ -23,3 +23,7 @@ mybatis-plus:
     banner: false
     db-config:
       id-type: auto
+
+# 测试永远走 Stub 语言模型（宪法 II：确定性、无网络）
+llm:
+  stub: true

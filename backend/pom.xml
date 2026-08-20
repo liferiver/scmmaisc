@@ -19,6 +19,9 @@
 
     <properties>
         <java.version>17</java.version>
+        <!-- UTF-8 源码编译（JDK 17 默认随平台字符集，Windows 中文环境需显式指定，否则非 ASCII 字符串乱码） -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
     </properties>
 

@@ -148,3 +148,119 @@ export interface ParamSet {
   result: RunResult
   savedAt: string
 }
+
+// ==================== 三期：多智能体讨论（镜像 contracts/discussions.md D1-D5） ====================
+
+/** 讨论状态枚举（D2）。 */
+export type DiscussionStatusValue = 'QUEUED' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'ABANDONED'
+
+/** D2 讨论状态与进度（2s 轮询）。 */
+export interface DiscussionStatus {
+  sessionId: number
+  runId: number
+  scenarioId: number
+  moduleId: string
+  scenarioName: string
+  status: DiscussionStatusValue
+  roundNo: number
+  queuePosition: number | null
+  utteranceCount: number
+  questionCount: number
+  abandonable: boolean
+}
+
+/** D3 运行快照（SC-005 可回溯依据）。 */
+export interface DiscussionSnapshot {
+  params: Record<string, unknown>
+  seed: number
+  outputs: OutputValue[]
+}
+
+/** 单条发言（agentRole：LIU/HUO/JING/ZHONG）。 */
+export interface Utterance {
+  id: number
+  agentRole: string
+  content: string
+  replyQuestionId: number | null
+}
+
+/** 单轮发言组。 */
+export interface DiscussionRound {
+  roundNo: number
+  title: string
+  utterances: Utterance[]
+}
+
+/** 学生插话（D4/US3）。 */
+export interface DiscussionQuestion {
+  id: number
+  roundNo: number
+  content: string
+  responded: boolean
+}
+
+/** 三维结论单段（键与 D3 契约一致）。 */
+export interface ConclusionSection {
+  [key: string]: string
+}
+
+/** 三维结论（theory/practice/frontier 各 4 要素）。 */
+export interface Conclusion {
+  theory: ConclusionSection
+  practice: ConclusionSection
+  frontier: ConclusionSection
+}
+
+/** D3 完整讨论记录。 */
+export interface DiscussionRecord {
+  sessionId: number
+  status: DiscussionStatusValue
+  roundNo: number
+  conclusionNote: string | null
+  snapshot: DiscussionSnapshot
+  rounds: DiscussionRound[]
+  questions: DiscussionQuestion[]
+  conclusion: Conclusion | null
+  moduleId: string
+  scenarioName: string
+}
+
+/** D1 创建结果（202）。 */
+export interface CreateDiscussionResult {
+  sessionId: number
+  status: DiscussionStatusValue
+  queuePosition: number
+}
+
+/** D5 放弃结果。 */
+export interface AbandonResult {
+  sessionId: number
+  status: DiscussionStatusValue
+}
+
+/** D4 插话提交结果（201）。 */
+export interface SubmitQuestionResult {
+  questionId: number
+  roundNo: number
+  truncated: boolean
+}
+
+// ==================== 三期：讨论历史与导出（D6/D7，US4 T041/T042） ====================
+
+/** D6 历史条目（列表展示字段）。 */
+export interface DiscussionHistoryItem {
+  sessionId: number
+  moduleId: string
+  scenarioName: string
+  status: DiscussionStatusValue
+  roundNo: number
+  utteranceCount: number
+  createdAt: string
+  finishedAt: string | null
+}
+
+/** D6 历史分页结果（时间倒序，默认 page=1&size=20 上限 50）。 */
+export interface DiscussionHistory {
+  total: number
+  items: DiscussionHistoryItem[]
+}

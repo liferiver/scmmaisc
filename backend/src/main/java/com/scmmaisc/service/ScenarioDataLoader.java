@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
@@ -24,9 +25,12 @@ import java.util.Map;
  * 幂等装载 chapter 与 scenario（以 code / module_id 为键：存在则更新，否则插入）。
  *
  * <p>数据驱动（FR-002）：场景定义更新只需修改 JSON，无需改动平台代码。</p>
+ * <p>@Order(1)：先于 ScenarioDiscussionProfileService（@Order(2)）装载，
+ * 保证讨论配置生成时场景表已就绪（US5）。</p>
  */
 @Slf4j
 @Component
+@Order(1)
 @RequiredArgsConstructor
 public class ScenarioDataLoader implements ApplicationRunner {
 
