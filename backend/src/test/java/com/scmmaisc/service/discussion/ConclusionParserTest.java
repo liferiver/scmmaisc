@@ -131,8 +131,56 @@ class ConclusionParserTest {
         assertEquals(ConclusionParser.FRONTIER_KEYS, frontier.keySet().stream().toList());
     }
 
+    @Test
+    @DisplayName("扁平结构 JSON（12 键在顶层，真实模型输出形态）→ 按三段分组解析成功")
+    void flatJsonParsed() {
+        String flat = flatJson();
+        ConclusionParser.ParseResult result = parser.parse(flat, () -> failIfCalled());
+        assertNull(result.note(), "扁平结构不应降级");
+        assertEquals("理论核心模型", result.conclusion().theory().values()[0]);
+        assertEquals("实操参数翻译", result.conclusion().practice().values()[0]);
+        assertEquals("产业前沿", result.conclusion().frontier().values()[0]);
+        assertEquals(4, result.conclusion().theory().values().length);
+        assertEquals(4, result.conclusion().practice().values().length);
+        assertEquals(4, result.conclusion().frontier().values().length);
+        assertEquals("兴趣投票", result.conclusion().frontier().values()[3]);
+    }
+
+    @Test
+    @DisplayName("扁平结构缺任一要素键 → 仍走重试（非静默通过）")
+    void flatJsonMissingKeyStillFails() {
+        String missing = flatJson().replace("\"voteItem\"", "\"missing\"");
+        AtomicInteger calls = new AtomicInteger();
+        ConclusionParser.ParseResult result = parser.parse(missing, () -> {
+            calls.incrementAndGet();
+            return validJson();
+        });
+        assertEquals(1, calls.get(), "扁平缺键应触发重试");
+        assertNull(result.note());
+    }
+
     private static String failIfCalled() {
         throw new AssertionError("合法输入不应触发重试");
+    }
+
+    /** 真实模型（如 DeepSeek）常见输出形态：12 键扁平在顶层，无 theory/practice/frontier 分组。 */
+    private static String flatJson() {
+        return """
+                {
+                  "coreModel": "理论核心模型",
+                  "derivation": "推导要点",
+                  "assumptions": "假设边界",
+                  "knowledgeLocation": "知识图谱定位",
+                  "paramBusiness": "实操参数翻译",
+                  "caseBenchmark": "案例对标",
+                  "simRealityGap": "仿真与现实差距",
+                  "suggestions": "落地建议",
+                  "industry": "产业前沿",
+                  "academic": "学术前沿",
+                  "studentAdvice": "学生关注建议",
+                  "voteItem": "兴趣投票"
+                }
+                """;
     }
 
     private static String validJson() {

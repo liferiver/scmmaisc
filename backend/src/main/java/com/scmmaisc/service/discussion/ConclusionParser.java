@@ -85,7 +85,15 @@ public class ConclusionParser {
         JsonNode practice = root.path("practice");
         JsonNode frontier = root.path("frontier");
         if (!hasKeys(theory, THEORY_KEYS) || !hasKeys(practice, PRACTICE_KEYS) || !hasKeys(frontier, FRONTIER_KEYS)) {
-            return null;
+            // 容错：部分真实模型（如 DeepSeek）不分组输出，12 键扁平在顶层 → 按三段分组映射；
+            // 缺任一要素键仍判非法（走重试，非静默通过）
+            if (hasKeys(root, THEORY_KEYS) && hasKeys(root, PRACTICE_KEYS) && hasKeys(root, FRONTIER_KEYS)) {
+                theory = root;
+                practice = root;
+                frontier = root;
+            } else {
+                return null;
+            }
         }
         return new ConclusionVO(
                 section(theory, THEORY_KEYS),

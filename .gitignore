@@ -54,4 +54,4 @@ docs/
 specs/
 dist/
 verify*.png
-
+wsl*.sh

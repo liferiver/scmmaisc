@@ -81,11 +81,11 @@ public class PromptBuilder {
         for (UtteranceView u : history.subList(from, history.size())) {
             messages.add(LlmMessage.assistant(u.content()));
         }
-        messages.add(LlmMessage.user("【结论生成】请基于本次运行结果与以上全部讨论，输出三段式结论 JSON："
-                + "理论结论（coreModel/derivation/assumptions/knowledgeLocation）、"
-                + "实操结论（paramBusiness/caseBenchmark/simRealityGap/suggestions）、"
-                + "前沿结论（industry/academic/studentAdvice/voteItem，voteItem 为钟同学兴趣投票）。"
-                + "引用数据必须与数据摘要一致，不得虚构。"));
+        messages.add(LlmMessage.user("【结论生成】请基于本次运行结果与以上全部讨论，只输出一个 JSON 对象，严格使用以下嵌套结构（键名不可改动，值用中文填写）："
+                + "{\"theory\":{\"coreModel\":\"...\",\"derivation\":\"...\",\"assumptions\":\"...\",\"knowledgeLocation\":\"...\"},"
+                + "\"practice\":{\"paramBusiness\":\"...\",\"caseBenchmark\":\"...\",\"simRealityGap\":\"...\",\"suggestions\":\"...\"},"
+                + "\"frontier\":{\"industry\":\"...\",\"academic\":\"...\",\"studentAdvice\":\"...\",\"voteItem\":\"...\"}}。"
+                + "voteItem 为钟同学兴趣投票。引用数据必须与数据摘要一致，不得虚构。除 JSON 外不要输出任何其他文字。"));
         return messages;
     }
 
